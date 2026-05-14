@@ -92,9 +92,9 @@ function createPointMaterial(defaultSize: number, defaultOpacity: number) {
     });
 }
 
-function createDuneSurface(config: DuneConfig, renderOrder: number): WaveSurface {
+function createDuneSurface(config: DuneConfig, renderOrder: number, densityScale: number = 1.0): WaveSurface {
     // Performance optimization: reduce particle count
-    const count = Math.floor(config.count * 0.15); // extreme optimization
+    const count = Math.floor(config.count * 0.15 * densityScale); // extreme optimization
     const sizeMultiplier = 1.4; // Reduced from 2.6 for smaller sand grains
 
     const positions = new Float32Array(count * 3);
@@ -253,6 +253,11 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
     camera.position.set(0, 0, 18);
     camera.lookAt(0, 0, 0);
 
+    const isMobile = window.innerWidth < 1024;
+    const densityScale = isMobile ? 0.4 : 1.0;
+    const waveScale = isMobile ? 0.6 : 1.0;
+    const yOffset = isMobile ? -1.0 : 0.0; // push down
+
     const waves = [
         createDuneSurface({
             count: 64000,
@@ -268,8 +273,8 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             phaseOffset: 3.1,
             startFade: 0.12,
             endFade: 0.2,
-            path: (flow) => 3.5 + Math.sin((1 - flow) * Math.PI) * 0.48 - flow * 0.22 + Math.sin(flow * Math.PI * 2.7) * 0.5,
-        }, 1),
+            path: (flow) => (3.5 + Math.sin((1 - flow) * Math.PI) * 0.48 - flow * 0.22 + Math.sin(flow * Math.PI * 2.7) * 0.5) * waveScale + yOffset,
+        }, 1, densityScale),
         createDuneSurface({
             count: 64000,
             startX: 20,
@@ -284,8 +289,8 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             phaseOffset: 3.1,
             startFade: 0.12,
             endFade: 0.2,
-            path: (flow) => 3.5 + Math.sin((1 - flow) * Math.PI) * 0.48 - flow * 0.22 + Math.sin(flow * Math.PI * 2.7) * 0.5,
-        }, 1),
+            path: (flow) => (3.5 + Math.sin((1 - flow) * Math.PI) * 0.48 - flow * 0.22 + Math.sin(flow * Math.PI * 2.7) * 0.5) * waveScale + yOffset,
+        }, 1, densityScale),
         createDuneSurface({
             count: 42000,
             startX: -20.4,
@@ -300,8 +305,8 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             phaseOffset: 2.2,
             startFade: 0.28,
             endFade: 0.18,
-            path: (flow) => 0.5 + Math.sin(flow * Math.PI * 0.95) * 0.48 - smoothstep(0.5, 1, flow) * 1.12 + Math.sin(flow * Math.PI * 4.1) * 0.3,
-        }, 2),
+            path: (flow) => (0.5 + Math.sin(flow * Math.PI * 0.95) * 0.48 - smoothstep(0.5, 1, flow) * 1.12 + Math.sin(flow * Math.PI * 4.1) * 0.3) * waveScale + yOffset,
+        }, 2, densityScale),
         createDuneSurface({
             count: 42000,
             startX: -20.4,
@@ -316,8 +321,8 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             phaseOffset: 2.2,
             startFade: 0.28,
             endFade: 0.18,
-            path: (flow) => 0.5 + Math.sin(flow * Math.PI * 0.95) * 0.48 - smoothstep(0.5, 1, flow) * 1.12 + Math.sin(flow * Math.PI * 4.1) * 0.3,
-        }, 2),
+            path: (flow) => (0.5 + Math.sin(flow * Math.PI * 0.95) * 0.48 - smoothstep(0.5, 1, flow) * 1.12 + Math.sin(flow * Math.PI * 4.1) * 0.3) * waveScale + yOffset,
+        }, 2, densityScale),
         createDuneSurface({
             count: 56000,
             startX: -20.6,
@@ -332,30 +337,14 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             phaseOffset: 1.35,
             startFade: 0.12,
             endFade: 0.18,
-            path: (flow) => -3.54 - flow * 0.82 + Math.sin(flow * Math.PI * 0.9) * 0.28 + Math.sin(flow * Math.PI * 3.5) * 0.28,
-        }, 3),
+            path: (flow) => (-3.54 - flow * 0.82 + Math.sin(flow * Math.PI * 0.9) * 0.28 + Math.sin(flow * Math.PI * 3.5) * 0.28) * waveScale + yOffset,
+        }, 3, densityScale),
         createDuneSurface({
             count: 56000,
             startX: -20.6,
             endX: 10.1,
             z: -5.7,
             depth: 4.4,
-            thickness: 2.5,
-            dustHeight: 0,
-            opacity: 0.75,
-            sizeMin: 0.4,
-            sizeMax: 1.56,
-            phaseOffset: 1.35,
-            startFade: 0.12,
-            endFade: 0.18,
-            path: (flow) => -3.54 - flow * 0.82 + Math.sin(flow * Math.PI * 0.9) * 0.28 + Math.sin(flow * Math.PI * 3.5) * 0.3,
-        }, 3),
-        createDuneSurface({
-            count: 64000,
-            startX: 20,
-            endX: -1,
-            z: -3.15,
-            depth: 5.1,
             thickness: 0,
             dustHeight: 24,
             opacity: 0.8,
@@ -364,8 +353,8 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             phaseOffset: 3.1,
             startFade: 0.12,
             endFade: 0.2,
-            path: (flow) => -5 + Math.sin(flow * Math.PI * 0.75) * 0.34 + smoothstep(0.52, 0.68, flow) * 0.56 - smoothstep(0.76, 1, flow) * 0.76 + Math.sin(flow * Math.PI * 4.8) * 0.5,
-        }, 4),
+            path: (flow) => (-5 + Math.sin(flow * Math.PI * 0.75) * 0.34 + smoothstep(0.52, 0.68, flow) * 0.56 - smoothstep(0.76, 1, flow) * 0.76 + Math.sin(flow * Math.PI * 4.8) * 0.5) * waveScale + yOffset,
+        }, 4, densityScale),
         createDuneSurface({
             count: 64000,
             startX: 20,
@@ -380,8 +369,8 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             phaseOffset: 3.1,
             startFade: 0.12,
             endFade: 0.2,
-            path: (flow) => -5 + Math.sin(flow * Math.PI * 0.75) * 0.34 + smoothstep(0.52, 0.68, flow) * 0.56 - smoothstep(0.76, 1, flow) * 0.76 + Math.sin(flow * Math.PI * 4.8) * 0.5,
-        }, 4),
+            path: (flow) => (-5 + Math.sin(flow * Math.PI * 0.75) * 0.34 + smoothstep(0.52, 0.68, flow) * 0.56 - smoothstep(0.76, 1, flow) * 0.76 + Math.sin(flow * Math.PI * 4.8) * 0.5) * waveScale + yOffset,
+        }, 4, densityScale),
 
         // BLUE LINE MOVEMENT — long powder wave, left to right
         createDuneSurface({
@@ -427,9 +416,9 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
                     + roundTop
                     + finalFall
                     + organicNoise
-                );
+                ) * waveScale + yOffset;
             },
-        }, 8),
+        }, 8, densityScale),
     ];
     scene.add(...waves.map((wave) => wave.points));
 

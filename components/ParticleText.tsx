@@ -126,7 +126,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                         vy: 0,
                         freeUntil: 0,
                         phase: Math.random() * Math.PI * 2,
-                        size: 1.2 + Math.random() * 1.5, // Small size as requested
+                        size: 1.4 + Math.random() * 1.8, // Slightly larger for rounder look
                         alpha: 0.65 + Math.random() * 0.32,
 
                     });
@@ -137,17 +137,17 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         particlesRef.current = particles;
     }, [lines]);
 
+    const initializedRef = useRef(false);
+
     // Lazy init: build particles only when section enters viewport
     useEffect(() => {
         const wrapper = wrapperRef.current;
         if (!wrapper) return;
 
-        let initialized = false;
-
         const intersectionObserver = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && !initialized) {
-                    initialized = true;
+                if (entries[0].isIntersecting && !initializedRef.current) {
+                    initializedRef.current = true;
                     buildParticles();
                     void document.fonts?.ready.then(buildParticles);
                 }
@@ -156,14 +156,23 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         );
         intersectionObserver.observe(wrapper);
 
+        let resizeTimeout: NodeJS.Timeout;
         const resizeObserver = new ResizeObserver(() => {
-            if (initialized) buildParticles();
+            if (initializedRef.current) {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => buildParticles(), 200);
+            }
         });
         resizeObserver.observe(wrapper);
+
+        if (initializedRef.current) {
+            buildParticles();
+        }
 
         return () => {
             intersectionObserver.disconnect();
             resizeObserver.disconnect();
+            clearTimeout(resizeTimeout);
         };
     }, [buildParticles]);
 
@@ -216,10 +225,12 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         circleCanvas.height = 16;
         const cCtx = circleCanvas.getContext("2d");
         if (cCtx) {
-            cCtx.beginPath();
-            cCtx.arc(8, 8, 7, 0, Math.PI * 2);
-            cCtx.fillStyle = "#E2E8F0";
-            cCtx.fill();
+            const grad = cCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
+            grad.addColorStop(0, "#E2E8F0");
+            grad.addColorStop(0.8, "#E2E8F0");
+            grad.addColorStop(1, "transparent");
+            cCtx.fillStyle = grad;
+            cCtx.fillRect(0, 0, 16, 16);
         }
 
         const draw = () => {
@@ -233,8 +244,9 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
             const movementEnergy = pointer.active && timeSinceMove < 180
                 ? Math.max(0, pointer.speed - 0.01) * (1 - timeSinceMove / 180)
                 : 0;
-            const disruptionRadius = 104;
-            const carryRadius = 240;
+            const isMobile = window.innerWidth < 768;
+            const disruptionRadius = isMobile ? 55 : 104;
+            const carryRadius = isMobile ? 130 : 240;
             const disruptionRadiusSq = disruptionRadius * disruptionRadius;
             const carryRadiusSq = carryRadius * carryRadius;
             const trail = pointer.trail;
@@ -292,7 +304,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                         const homeY = particle.baseY - particle.y;
                         const returnDelay = Math.max(0, timeSinceMove - 50);
                         const canReturn = now > particle.freeUntil && movementEnergy === 0;
-                        const returnForce = canReturn ? Math.min(returnDelay / 200, 1) * 0.18 : 0; // Faster reconstruction
+                        const returnForce = canReturn ? Math.min(returnDelay / 200, 1) * 0.09 : 0; // Heavier sand feel
 
                         particle.vx += homeX * returnForce;
                         particle.vy += homeY * returnForce;
@@ -331,7 +343,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                                 const trailAge = Math.max(0, now - bestPoint.time);
                                 const trailFade = 1 - Math.min(trailAge / 700, 1);
                                 const motionBoost = Math.min(bestPoint.speed * 0.22, 3.2);
-                                const directionalForce = carryForce * trailFade * (1.45 + motionBoost);
+                                const directionalForce = carryForce * trailFade * (1.1 + motionBoost);
                                 const radialForce = disruptForce * 0.13;
                                 const shimmer = Math.sin(now * 0.0035 + particle.phase) * 0.035;
 
@@ -341,7 +353,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                             }
                         }
 
-                        const drag = movementEnergy > 0 || now < particle.freeUntil ? 0.985 : 0.82; // Original snap drag
+                        const drag = movementEnergy > 0 || now < particle.freeUntil ? 0.985 : 0.85; // Original drag balance
                         particle.vx *= drag;
                         particle.vy *= drag;
                         particle.x += particle.vx;

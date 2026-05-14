@@ -19,12 +19,38 @@ export default function Hero() {
     const explodeFiredRef = useRef(false);
 
     const [isMobile, setIsMobile] = useState(false);
+    const [offsets, setOffsets] = useState({ text: 230, logo: -30 });
 
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        const updateLayout = () => {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            setIsMobile(w < 768);
+
+            const isPortraitMobile = w < 768 && h > w;
+            const isLandscapeMobile = h < 500;
+            
+            const aspect = w / h;
+            const isSquareish = aspect < 1.1;
+
+            if (w > 1024 && !isSquareish) {
+                // Desktop: EXACTLY AS ORIGINAL
+                setOffsets({ text: 230, logo: -30 });
+            } else if (w >= 768 || (w > 1024 && isSquareish)) {
+                // Tablet or Square Desktop (proportional so it never overlaps)
+                setOffsets({ text: h * 0.30, logo: -h * 0.12 });
+            } else if (isPortraitMobile) {
+                // Mobile Portrait - even closer gap for better composition
+                setOffsets({ text: h * 0.24, logo: -h * 0.09 });
+            } else {
+                // Mobile Landscape
+                setOffsets({ text: h * 0.28, logo: -h * 0.20 });
+            }
+        };
+
+        updateLayout();
+        window.addEventListener('resize', updateLayout);
+        return () => window.removeEventListener('resize', updateLayout);
     }, []);
 
     const { scrollY } = useScroll();
@@ -85,7 +111,7 @@ export default function Hero() {
     return (
         <>
             {/* HERO */}
-            <section className="relative h-screen overflow-hidden">
+            <section className="relative h-[100svh] overflow-hidden">
 
                 {/* PARTICLE TEXT (SAND) */}
                 <motion.div
@@ -101,8 +127,8 @@ export default function Hero() {
                     <ParticleText
                         lines={["SCALSET"]}
                         ariaLabel="Scalset"
-                        className="text-[clamp(2.0rem,6vw,5.2rem)] font-bold tracking-[0.3em] md:tracking-[0.75em] uppercase font-[family-name:var(--font-syncopate)]"
-                        yOffset={isMobile ? 80 : 230}
+                        className="text-[clamp(2.2rem,12vw,5.2rem)] font-bold tracking-[0.3em] md:tracking-[0.75em] uppercase font-[family-name:var(--font-syncopate)]"
+                        yOffset={offsets.text}
                         explode={shouldExplode}
                     />
                 </motion.div>
@@ -122,7 +148,7 @@ export default function Hero() {
                         alt="Scalset Logo"
                         className="w-full h-full"
                         explode={shouldExplode}
-                        yOffset={isMobile ? -60 : -30}
+                        yOffset={offsets.logo}
                     />
                 </motion.div>
 
@@ -192,10 +218,9 @@ export default function Hero() {
                 >
                     <ParticleText
                         lines={
-                            isMobile
+                            window.innerWidth < 768
                                 ? [
-                                    "On s'occupe",
-                                    "de votre équipe.",
+                                    "On s'occupe de votre équipe.",
                                     "Vous développez",
                                     "votre business.",
                                 ]
@@ -205,8 +230,8 @@ export default function Hero() {
                                 ]
                         }
                         ariaLabel="On s'occupe de votre équipe. Vous développez votre business."
-                        className="mx-auto whitespace-nowrap text-[clamp(1.5rem,4.5vw,5.2rem)] font-bold tracking-tighter leading-[1.1] md:leading-[0.98] py-4"
-                        yOffset={isMobile ? -80 : -50}
+                        className="mx-auto whitespace-nowrap text-[clamp(1.5rem,4.5vw,5.2rem)] font-bold tracking-tighter md:tracking-tighter leading-[1.1] md:leading-[0.98] py-4"
+                        yOffset={window.innerWidth < 768 ? -100 : -50}
                     />
                 </motion.div>
 

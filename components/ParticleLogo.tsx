@@ -98,7 +98,19 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
             const ctx = sampleCanvas.getContext("2d", { willReadFrequently: true });
             if (!ctx) return;
 
-            const fitScale = Math.min(width / img.naturalWidth, height / img.naturalHeight) * 0.72;
+            const isPortraitMobile = width < 768 && height > width;
+            const isLandscapeMobile = height < 500;
+
+            const w = window.innerWidth;
+            const aspect = width / height;
+            const isSquareish = aspect < 1.1;
+
+            let mobileScale = 0.72; // Desktop Default
+            if (w <= 1024 || isSquareish) {
+                mobileScale = isPortraitMobile ? 0.52 : (isLandscapeMobile ? 0.42 : 0.55);
+            }
+
+            const fitScale = Math.min(width / img.naturalWidth, height / img.naturalHeight) * mobileScale;
             const drawW = img.naturalWidth * fitScale;
             const drawH = img.naturalHeight * fitScale;
             const drawX = (width - drawW) / 2;
@@ -126,7 +138,7 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
                             vy: 0,
                             freeUntil: 0,
                             phase: Math.random() * Math.PI * 2,
-                            size: 1.2 + Math.random() * 1.5, // Small size as requested
+                            size: 1.4 + Math.random() * 1.8, // Slightly larger for rounder look as requested
                             alpha: 0.65 + Math.random() * 0.3,
                         });
                     }
@@ -141,9 +153,16 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
         buildParticles();
         const wrapper = wrapperRef.current;
         if (!wrapper) return;
-        const resizeObserver = new ResizeObserver(buildParticles);
+        let resizeTimeout: NodeJS.Timeout;
+        const resizeObserver = new ResizeObserver(() => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => buildParticles(), 200);
+        });
         resizeObserver.observe(wrapper);
-        return () => resizeObserver.disconnect();
+        return () => {
+            resizeObserver.disconnect();
+            clearTimeout(resizeTimeout);
+        };
     }, [buildParticles]);
 
     useEffect(() => {
@@ -165,10 +184,12 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
         circleCanvas.height = 16;
         const cCtx = circleCanvas.getContext("2d");
         if (cCtx) {
-            cCtx.beginPath();
-            cCtx.arc(8, 8, 7, 0, Math.PI * 2);
-            cCtx.fillStyle = "#E2E8F0";
-            cCtx.fill();
+            const grad = cCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
+            grad.addColorStop(0, "#E2E8F0");
+            grad.addColorStop(0.8, "#E2E8F0");
+            grad.addColorStop(1, "transparent");
+            cCtx.fillStyle = grad;
+            cCtx.fillRect(0, 0, 16, 16);
         }
 
         const draw = () => {
@@ -249,8 +270,9 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
                             pointer.active && timeSinceMove < 180
                                 ? Math.max(0, pointer.speed - 0.01) * (1 - timeSinceMove / 180)
                                 : 0;
-                        const disruptionRadius = 90;
-                        const carryRadius = 200;
+                        const isMobile = window.innerWidth < 768;
+                        const disruptionRadius = isMobile ? 50 : 90;
+                        const carryRadius = isMobile ? 110 : 200;
                         const disruptionRadiusSq = disruptionRadius ** 2;
                         const carryRadiusSq = carryRadius ** 2;
                         const trail = pointer.trail;
@@ -260,7 +282,7 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
                             const homeY = particle.baseY - particle.y;
                             const returnDelay = Math.max(0, timeSinceMove - 50);
                             const canReturn = now > particle.freeUntil && movementEnergy === 0;
-                            const returnForce = canReturn ? Math.min(returnDelay / 200, 1) * 0.15 : 0; // Faster reconstruction
+                            const returnForce = canReturn ? Math.min(returnDelay / 200, 1) * 0.12 : 0; // Original movement feel
 
                             particle.vx += homeX * returnForce;
                             particle.vy += homeY * returnForce;
