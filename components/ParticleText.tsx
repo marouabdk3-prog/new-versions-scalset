@@ -106,7 +106,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         });
 
         const imageData = sampleContext.getImageData(0, 0, width, height).data;
-        const sampleStep = 2;
+        const sampleStep = 3; // Optimized density
         const particles: Particle[] = [];
 
         for (let y = 0; y < height; y += sampleStep) {
@@ -126,8 +126,8 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                         vy: 0,
                         freeUntil: 0,
                         phase: Math.random() * Math.PI * 2,
-                        size: 1.2 + Math.random() * 1.6,
-alpha: 0.65 + Math.random() * 0.32,
+                        size: 2.2 + Math.random() * 1.5, // Larger size to compensate for lower density
+                        alpha: 0.65 + Math.random() * 0.32,
 
                     });
                 }
@@ -272,9 +272,7 @@ alpha: 0.65 + Math.random() * 0.32,
                             const alphaMultiplier = Math.max(0, 1 - Math.pow(t, 1.5));
                             if (alphaMultiplier > 0.01) {
                                 context.globalAlpha = particle.alpha * alphaMultiplier;
-                                context.beginPath();
-                                context.arc(particle.x + particle.size / 2, particle.y + particle.size / 2, particle.size / 2, 0, Math.PI * 2);
-                                context.fill();
+                                context.fillRect(particle.x, particle.y, particle.size, particle.size);
                             }
                         });
                     } else {
@@ -283,7 +281,7 @@ alpha: 0.65 + Math.random() * 0.32,
                         const homeY = particle.baseY - particle.y;
                         const returnDelay = Math.max(0, timeSinceMove - 50);
                         const canReturn = now > particle.freeUntil && movementEnergy === 0;
-                        const returnForce = canReturn ? Math.min(returnDelay / 200, 1) * 0.18 : 0;
+                        const returnForce = canReturn ? Math.min(returnDelay / 200, 1) * 0.18 : 0; // Faster reconstruction
 
                         particle.vx += homeX * returnForce;
                         particle.vy += homeY * returnForce;
@@ -332,16 +330,14 @@ alpha: 0.65 + Math.random() * 0.32,
                             }
                         }
 
-                        const drag = movementEnergy > 0 || now < particle.freeUntil ? 0.985 : 0.82;
+                        const drag = movementEnergy > 0 || now < particle.freeUntil ? 0.985 : 0.82; // Original snap drag
                         particle.vx *= drag;
                         particle.vy *= drag;
                         particle.x += particle.vx;
                         particle.y += particle.vy;
 
                         context.globalAlpha = particle.alpha;
-                        context.beginPath();
-                        context.arc(particle.x + particle.size / 2, particle.y + particle.size / 2, particle.size / 2, 0, Math.PI * 2);
-                        context.fill();
+                        context.fillRect(particle.x, particle.y, particle.size, particle.size);
                     });
                 }
 

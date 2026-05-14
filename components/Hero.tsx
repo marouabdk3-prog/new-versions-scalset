@@ -5,6 +5,7 @@ import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import Link from "next/link";
 import ParticleLogo from "./ParticleLogo";
 import ParticleText from "./ParticleText";
+import SandButton from "./SandButton";
 
 export default function Hero() {
     const [shouldExplode, setShouldExplode] = useState(false);
@@ -100,8 +101,8 @@ export default function Hero() {
                     <ParticleText
                         lines={["SCALSET"]}
                         ariaLabel="Scalset"
-                        className="text-[clamp(2.4rem,8vw,5.2rem)] font-bold tracking-[0.45em] md:tracking-[0.75em] uppercase font-[family-name:var(--font-syncopate)]"
-                        yOffset={230}
+                        className="text-[clamp(2.0rem,6vw,5.2rem)] font-bold tracking-[0.3em] md:tracking-[0.75em] uppercase font-[family-name:var(--font-syncopate)]"
+                        yOffset={isMobile ? 80 : 230}
                         explode={shouldExplode}
                     />
                 </motion.div>
@@ -121,7 +122,7 @@ export default function Hero() {
                         alt="Scalset Logo"
                         className="w-full h-full"
                         explode={shouldExplode}
-                        yOffset={-30}
+                        yOffset={isMobile ? -60 : -30}
                     />
                 </motion.div>
 
@@ -174,7 +175,7 @@ export default function Hero() {
             </section>
 
             {/* SECTION 2 */}
-            <section className="relative min-h-screen overflow-hidden">
+            <section className="relative min-h-[100dvh] md:min-h-screen overflow-hidden -mt-10 md:-mt-20">
 
                 <motion.div
                     initial={{ opacity: 0 }}
@@ -205,6 +206,7 @@ export default function Hero() {
                         }
                         ariaLabel="On s'occupe de votre équipe. Vous développez votre business."
                         className="mx-auto max-w-[94vw] text-[clamp(2.1rem,7vw,5.2rem)] font-bold tracking-tighter leading-[1.1] md:leading-[0.98] py-4"
+                        yOffset={isMobile ? -80 : -50}
                     />
                 </motion.div>
 
@@ -228,12 +230,12 @@ export default function Hero() {
                         dans nos locaux, tout en restant pilotée par vous.
                     </p>
 
-                    <Link
-                        href="#contact"
-                        className="inline-flex btn-shiny transition-all text-lg min-h-[44px] px-6 items-center justify-center"
-                    >
+                    <SandButton href="#contact">
+                        <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
                         Nous Contacter
-                    </Link>
+                    </SandButton>
                 </motion.div>
 
             </section>

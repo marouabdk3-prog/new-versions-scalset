@@ -108,7 +108,7 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
             ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
             const imageData = ctx.getImageData(0, 0, width, height).data;
-            const sampleStep = 2;
+            const sampleStep = 3; // Optimized density
             const particles: Particle[] = [];
 
             for (let y = 0; y < height; y += sampleStep) {
@@ -126,7 +126,7 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
                             vy: 0,
                             freeUntil: 0,
                             phase: Math.random() * Math.PI * 2,
-                            size: 1.1 + Math.random() * 1.5,
+                            size: 2.2 + Math.random() * 1.5, // Larger size to compensate for lower density
                             alpha: 0.65 + Math.random() * 0.3,
                         });
                     }
@@ -221,9 +221,7 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
 
                             if (alphaMultiplier > 0.01) {
                                 context.globalAlpha = particle.alpha * alphaMultiplier;
-                                context.beginPath();
-                                context.arc(particle.x + particle.size / 2, particle.y + particle.size / 2, particle.size / 2, 0, Math.PI * 2);
-                                context.fill();
+                                context.fillRect(particle.x, particle.y, particle.size, particle.size);
                             }
                         });
 
@@ -251,7 +249,7 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
                             const homeY = particle.baseY - particle.y;
                             const returnDelay = Math.max(0, timeSinceMove - 50);
                             const canReturn = now > particle.freeUntil && movementEnergy === 0;
-                            const returnForce = canReturn ? Math.min(returnDelay / 200, 1) * 0.18 : 0;
+                            const returnForce = canReturn ? Math.min(returnDelay / 200, 1) * 0.15 : 0; // Faster reconstruction
 
                             particle.vx += homeX * returnForce;
                             particle.vy += homeY * returnForce;
@@ -307,16 +305,14 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
                                 }
                             }
 
-                            const drag = movementEnergy > 0 || now < particle.freeUntil ? 0.985 : 0.82;
+                            const drag = movementEnergy > 0 || now < particle.freeUntil ? 0.985 : 0.82; // Original snap drag
                             particle.vx *= drag;
                             particle.vy *= drag;
                             particle.x += particle.vx;
                             particle.y += particle.vy;
 
                             context.globalAlpha = particle.alpha;
-                            context.beginPath();
-                            context.arc(particle.x + particle.size / 2, particle.y + particle.size / 2, particle.size / 2, 0, Math.PI * 2);
-                            context.fill();
+                            context.fillRect(particle.x, particle.y, particle.size, particle.size);
                         });
 
                         context.globalAlpha = 1;

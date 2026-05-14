@@ -95,7 +95,7 @@ function createPointMaterial(defaultSize: number, defaultOpacity: number) {
 function createDuneSurface(config: DuneConfig, renderOrder: number): WaveSurface {
     // Performance optimization: reduce particle count
     const count = Math.floor(config.count * 0.15); // extreme optimization
-    const sizeMultiplier = 2.6;
+    const sizeMultiplier = 1.4; // Reduced from 2.6 for smaller sand grains
 
     const positions = new Float32Array(count * 3);
     const baseX = new Float32Array(count);
@@ -111,7 +111,7 @@ function createDuneSurface(config: DuneConfig, renderOrder: number): WaveSurface
     const shades = new Float32Array(count);
 
     for (let index = 0; index < count; index += 1) {
-        const isDust = Math.random() > 0.75 ? 1 : 0;
+        const isDust = Math.random() > 0.45 ? 1 : 0; // Increased dust proportion
         const t = Math.random();
         const x = config.startX + (config.endX - config.startX) * t;
         const y = config.path(t);
@@ -124,7 +124,7 @@ function createDuneSurface(config: DuneConfig, renderOrder: number): WaveSurface
         const fadeOut = 1 - smoothstep(1 - config.endFade, 1, t);
         const body = Math.max(0, 1 - Math.abs(thicknessNoise) * 1.45);
         const centerClear = 1 - Math.exp(-((x * x) / 16 + (y * y) / 7.8)) * 0.44;
-        const alpha = Math.pow(fadeIn * fadeOut, 1.42) * (isDust ? 0.34 : 0.68 + body * 0.48) * config.opacity * centerClear;
+        const alpha = Math.pow(fadeIn * fadeOut, 1.42) * (isDust ? 0.65 : 0.68 + body * 0.48) * config.opacity * centerClear; // Increased dust visibility
         const positionIndex = index * 3;
 
         positions[positionIndex] = x;
@@ -200,14 +200,14 @@ function updateWave(wave: WaveSurface, time: number) {
             // Parabolic arc — rises fast then drifts down
             const arc = inFlight * (1.0 - inFlight * 0.3);
             // Height: volatilized sand flies high
-            dustLift = arc * (1.2 + gustStrength * 0.8) +
-                Math.sin(phase * 2.2 + d * 5.0) * 0.15 * inFlight;
+            dustLift = arc * (2.8 + gustStrength * 1.5) +
+                Math.sin(phase * 2.2 + d * 5.0) * 0.25 * inFlight;
             // Horizontal carry by wind while in flight
-            dustCarry = inFlight * (0.8 + gustStrength * 0.6) *
+            dustCarry = inFlight * (2.0 + gustStrength * 1.2) *
                 (0.7 + Math.sin(d * 3.0) * 0.3);
             // Swirl/turbulence in the air
-            dustLift += Math.sin(phase * 3.0 + d * 7.0) * 0.12 * inFlight;
-            dustCarry += Math.cos(phase * 2.5 + d * 4.0) * 0.15 * inFlight;
+            dustLift += Math.sin(phase * 3.0 + d * 7.0) * 0.2 * inFlight;
+            dustCarry += Math.cos(phase * 2.5 + d * 4.0) * 0.25 * inFlight;
         }
 
         // Rolling undulation — sand dune surface breathing
@@ -287,7 +287,7 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             path: (flow) => 3.5 + Math.sin((1 - flow) * Math.PI) * 0.48 - flow * 0.22 + Math.sin(flow * Math.PI * 2.7) * 0.5,
         }, 1),
         createDuneSurface({
-           count: 42000,
+            count: 42000,
             startX: -20.4,
             endX: 0,
             z: -4.7,
@@ -319,7 +319,7 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             path: (flow) => 0.5 + Math.sin(flow * Math.PI * 0.95) * 0.48 - smoothstep(0.5, 1, flow) * 1.12 + Math.sin(flow * Math.PI * 4.1) * 0.3,
         }, 2),
         createDuneSurface({
-             count: 56000,
+            count: 56000,
             startX: -20.6,
             endX: 10.1,
             z: -5.7,
@@ -335,7 +335,7 @@ function setupWaveScene(canvas: HTMLCanvasElement): WaveSceneState {
             path: (flow) => -3.54 - flow * 0.82 + Math.sin(flow * Math.PI * 0.9) * 0.28 + Math.sin(flow * Math.PI * 3.5) * 0.28,
         }, 3),
         createDuneSurface({
-           count: 56000,
+            count: 56000,
             startX: -20.6,
             endX: 10.1,
             z: -5.7,
@@ -461,8 +461,17 @@ export default function SandBackground() {
         const resize = () => {
             const width = mount.clientWidth;
             const height = mount.clientHeight;
+            const aspect = width / Math.max(1, height);
 
-            state.camera.aspect = width / Math.max(1, height);
+            state.camera.aspect = aspect;
+
+            // Adjust camera distance for portrait (mobile) screens to avoid horizontal clipping
+            if (aspect < 1) {
+                state.camera.position.z = 18 + (1 - aspect) * 22; // Pull camera back on narrow screens
+            } else {
+                state.camera.position.z = 18;
+            }
+
             state.camera.updateProjectionMatrix();
             state.renderer.setSize(width, height, false);
         };
