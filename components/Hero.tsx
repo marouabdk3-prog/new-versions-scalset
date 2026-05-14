@@ -205,7 +205,7 @@ export default function Hero() {
                                 ]
                         }
                         ariaLabel="On s'occupe de votre équipe. Vous développez votre business."
-                        className="mx-auto max-w-[94vw] text-[clamp(2.1rem,7vw,5.2rem)] font-bold tracking-tighter leading-[1.1] md:leading-[0.98] py-4"
+                        className="mx-auto whitespace-nowrap text-[clamp(1.5rem,4.5vw,5.2rem)] font-bold tracking-tighter leading-[1.1] md:leading-[0.98] py-4"
                         yOffset={isMobile ? -80 : -50}
                     />
                 </motion.div>
@@ -223,7 +223,7 @@ export default function Hero() {
                         ease: "easeOut",
                         delay: 0.35,
                     }}
-                    className="absolute bottom-14 md:bottom-16 inset-x-0 flex flex-col items-center gap-6 px-6 text-center"
+                    className="absolute bottom-24 md:bottom-28 inset-x-0 flex flex-col items-center gap-6 px-6 text-center"
                 >
                     <p className="max-w-4xl text-lg md:text-xl lg:text-2xl leading-[1.2] text-transparent bg-clip-text bg-gradient-to-r from-[#E2E8F0] to-[#94A3B8] max-[480px]:text-[0.95rem]">
                         Nous recrutons, formons et supervisons votre équipe

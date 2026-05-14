@@ -106,7 +106,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         });
 
         const imageData = sampleContext.getImageData(0, 0, width, height).data;
-        const sampleStep = 3; // Optimized density
+        const sampleStep = 2; // High density
         const particles: Particle[] = [];
 
         for (let y = 0; y < height; y += sampleStep) {
@@ -126,7 +126,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                         vy: 0,
                         freeUntil: 0,
                         phase: Math.random() * Math.PI * 2,
-                        size: 2.2 + Math.random() * 1.5, // Larger size to compensate for lower density
+                        size: 1.2 + Math.random() * 1.5, // Small size as requested
                         alpha: 0.65 + Math.random() * 0.32,
 
                     });
@@ -211,6 +211,17 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         let animationFrame = 0;
         let loopRunning = false;
 
+        const circleCanvas = document.createElement("canvas");
+        circleCanvas.width = 16;
+        circleCanvas.height = 16;
+        const cCtx = circleCanvas.getContext("2d");
+        if (cCtx) {
+            cCtx.beginPath();
+            cCtx.arc(8, 8, 7, 0, Math.PI * 2);
+            cCtx.fillStyle = "#E2E8F0";
+            cCtx.fill();
+        }
+
         const draw = () => {
             if (!loopRunning) return;
             const canvas = canvasRef.current;
@@ -272,7 +283,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                             const alphaMultiplier = Math.max(0, 1 - Math.pow(t, 1.5));
                             if (alphaMultiplier > 0.01) {
                                 context.globalAlpha = particle.alpha * alphaMultiplier;
-                                context.fillRect(particle.x, particle.y, particle.size, particle.size);
+                                context.drawImage(circleCanvas, particle.x, particle.y, particle.size, particle.size);
                             }
                         });
                     } else {
@@ -337,7 +348,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                         particle.y += particle.vy;
 
                         context.globalAlpha = particle.alpha;
-                        context.fillRect(particle.x, particle.y, particle.size, particle.size);
+                        context.drawImage(circleCanvas, particle.x, particle.y, particle.size, particle.size);
                     });
                 }
 
