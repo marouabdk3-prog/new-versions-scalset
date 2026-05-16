@@ -158,6 +158,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                         // Very fine, small particles
                         size: (0.6 + Math.random() * 1.0) * (window.innerWidth < 768 ? 0.7 : 1.0),
                         alpha: 0.3 + Math.random() * 0.4,
+                        isFlying: false,
                         // Sequential delay for left-to-right assembly
                         delay: (x / width) * 1200 + Math.random() * 400,
                         isLocked: false,
