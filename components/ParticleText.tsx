@@ -13,6 +13,9 @@ type Particle = {
     phase: number;
     size: number;
     alpha: number;
+    isFlying: boolean;
+    delay: number;
+    isLocked: boolean;
 };
 
 type TrailPoint = {
@@ -51,12 +54,18 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         trail: [] as TrailPoint[],
     });
     const explodeRef = useRef(explode);
-    explodeRef.current = explode;
+
+    useEffect(() => {
+        explodeRef.current = explode;
+    }, [explode]);
 
     const explodeStateRef = useRef<{
         active: boolean;
         startTime: number;
     }>({ active: false, startTime: 0 });
+
+    const constructionStartTimeRef = useRef<number>(0);
+    const initializedRef = useRef(false);
 
     const buildParticles = useCallback(() => {
         const wrapper = wrapperRef.current;
@@ -100,44 +109,67 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         sampleContext.textBaseline = "middle";
         sampleContext.fillStyle = "#ffffff";
 
-        const firstLineY = textOffsetY + textRect.height / 2 - ((lines.length - 1) * lineHeight) / 2 + yOffset;
-        lines.forEach((line, index) => {
+        const maxWidth = width * 0.95; // Match HTML wrapping logic
+        const words = lines.join(" ").split(" ");
+        const wrappedLines: string[] = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const testLine = currentLine + " " + word;
+            const testWidth = sampleContext.measureText(testLine).width;
+            if (testWidth < maxWidth) {
+                currentLine = testLine;
+            } else {
+                wrappedLines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        wrappedLines.push(currentLine);
+
+        const firstLineY = textOffsetY + textRect.height / 2 - ((wrappedLines.length - 1) * lineHeight) / 2 + yOffset;
+
+        wrappedLines.forEach((line, index) => {
             sampleContext.fillText(line, textOffsetX + textRect.width / 2, firstLineY + index * lineHeight);
         });
 
         const imageData = sampleContext.getImageData(0, 0, width, height).data;
-        const sampleStep = 2; // High density
+        const sampleStep = 1; // Extremely high density for fine dust
         const particles: Particle[] = [];
 
         for (let y = 0; y < height; y += sampleStep) {
             for (let x = 0; x < width; x += sampleStep) {
                 const alpha = imageData[(y * width + x) * 4 + 3];
 
-                if (alpha > 30) {
-                    const baseX = x + (Math.random() - 0.5) * 1.2;
-                    const baseY = y + (Math.random() - 0.5) * 1.2;
+                if (alpha > 40) { // Slightly higher threshold to avoid noise
+                    const baseX = x + (Math.random() - 0.5) * 0.5;
+                    const baseY = y + (Math.random() - 0.5) * 0.5;
 
                     particles.push({
                         baseX,
                         baseY,
-                        x: baseX,
-                        y: baseY,
-                        vx: 0,
-                        vy: 0,
+                        // Start from the right side, off-screen, slightly scattered vertically
+                        x: width + Math.random() * width * 0.8,
+                        y: baseY + (Math.random() - 0.5) * height * 0.5,
+                        vx: -Math.random() * 0.5,
+                        vy: (Math.random() - 0.5) * 0.2,
                         freeUntil: 0,
                         phase: Math.random() * Math.PI * 2,
-                        size: 1.4 + Math.random() * 1.8, // Slightly larger for rounder look
-                        alpha: 0.65 + Math.random() * 0.32,
-
+                        // Very fine, small particles
+                        size: (0.6 + Math.random() * 1.0) * (window.innerWidth < 768 ? 0.7 : 1.0),
+                        alpha: 0.3 + Math.random() * 0.4,
+                        // Sequential delay for left-to-right assembly
+                        delay: (x / width) * 1200 + Math.random() * 400,
+                        isLocked: false,
                     });
                 }
             }
         }
 
         particlesRef.current = particles;
+        // Reset initialization so the animation restarts properly if particles are rebuilt
+        initializedRef.current = false;
     }, [lines]);
-
-    const initializedRef = useRef(false);
 
     // Lazy init: build particles only when section enters viewport
     useEffect(() => {
@@ -148,8 +180,12 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
             (entries) => {
                 if (entries[0].isIntersecting && !initializedRef.current) {
                     initializedRef.current = true;
+                    constructionStartTimeRef.current = performance.now();
                     buildParticles();
-                    void document.fonts?.ready.then(buildParticles);
+                    void document.fonts?.ready.then(() => {
+                        constructionStartTimeRef.current = performance.now();
+                        buildParticles();
+                    });
                 }
             },
             { threshold: 0.05 }
@@ -225,12 +261,10 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         circleCanvas.height = 16;
         const cCtx = circleCanvas.getContext("2d");
         if (cCtx) {
-            const grad = cCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
-            grad.addColorStop(0, "#E2E8F0");
-            grad.addColorStop(0.8, "#E2E8F0");
-            grad.addColorStop(1, "transparent");
-            cCtx.fillStyle = grad;
-            cCtx.fillRect(0, 0, 16, 16);
+            cCtx.beginPath();
+            cCtx.arc(8, 8, 7.5, 0, Math.PI * 2);
+            cCtx.fillStyle = "#ffffff"; // Pure white for fine dust
+            cCtx.fill();
         }
 
         const draw = () => {
@@ -299,71 +333,72 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
                             }
                         });
                     } else {
+                        const elapsedConstruction = now - constructionStartTimeRef.current;
+                        
                         particles.forEach((particle) => {
-                        const homeX = particle.baseX - particle.x;
-                        const homeY = particle.baseY - particle.y;
-                        const returnDelay = Math.max(0, timeSinceMove - 50);
-                        const canReturn = now > particle.freeUntil && movementEnergy === 0;
-                        const returnForce = canReturn ? Math.min(returnDelay / 200, 1) * 0.09 : 0; // Heavier sand feel
-
-                        particle.vx += homeX * returnForce;
-                        particle.vy += homeY * returnForce;
-
-                        if (movementEnergy > 0) {
-                            let bestPoint: TrailPoint | null = null;
-                            let bestDistanceSq = carryRadiusSq;
-
-                            for (let i = trail.length - 1; i >= 0; i -= 1) {
-                                const point = trail[i];
-                                const age = now - point.time;
-
-                                if (age > 700) {
-                                    break;
-                                }
-
-                                const dx = particle.x - point.x;
-                                const dy = particle.y - point.y;
-                                const distanceSq = dx * dx + dy * dy;
-
-                                if (distanceSq < bestDistanceSq) {
-                                    bestDistanceSq = distanceSq;
-                                    bestPoint = point;
-                                }
+                            const particleElapsed = elapsedConstruction - particle.delay;
+                            
+                            // 1. AMBIENT DRIFT (Before attraction starts)
+                            if (particleElapsed < 0) {
+                                // Drift slowly to the left
+                                particle.x -= 0.15 + Math.random() * 0.1;
+                                particle.y += Math.cos(now * 0.001 + particle.phase) * 0.05;
+                                
+                                context.globalAlpha = particle.alpha * 0.2; // Very faded while drifting
+                                context.drawImage(circleCanvas, particle.x, particle.y, particle.size, particle.size);
+                                return;
                             }
 
-                            if (bestPoint && bestDistanceSq > 0) {
-                                const pointerDx = particle.x - bestPoint.x;
-                                const pointerDy = particle.y - bestPoint.y;
-                                const distanceSq = bestDistanceSq;
-                                const distance = Math.sqrt(distanceSq);
-                                const disruptForce = distanceSq < disruptionRadiusSq
-                                    ? ((disruptionRadius - distance) / disruptionRadius) ** 2
-                                    : 0;
-                                const carryForce = ((carryRadius - distance) / carryRadius) ** 2;
-                                const trailAge = Math.max(0, now - bestPoint.time);
-                                const trailFade = 1 - Math.min(trailAge / 700, 1);
-                                const motionBoost = Math.min(bestPoint.speed * 0.22, 3.2);
-                                const directionalForce = carryForce * trailFade * (1.1 + motionBoost);
-                                const radialForce = disruptForce * 0.13;
-                                const shimmer = Math.sin(now * 0.0035 + particle.phase) * 0.035;
+                            const dx = particle.baseX - particle.x;
+                            const dy = particle.baseY - particle.y;
+                            const distSq = dx * dx + dy * dy;
+                            const dist = Math.sqrt(distSq);
 
-                                particle.vx += bestPoint.directionX * directionalForce + (pointerDx / distance) * radialForce + shimmer;
-                                particle.vy += bestPoint.directionY * directionalForce + (pointerDy / distance) * radialForce - shimmer * 0.35;
-                                particle.freeUntil = now + 1100;
+                            // 2. MAGNETIC ATTRACTION PHASE
+                            if (!particle.isLocked) {
+                                const gatherT = Math.min(particleElapsed / 1000, 1);
+                                // Very soft ease-out for a gentle landing
+                                const ease = 1 - Math.pow(1 - gatherT, 4);
+                                
+                                const pullForce = 0.015 + ease * 0.08;
+                                particle.vx += dx * pullForce;
+                                particle.vy += dy * pullForce;
+                                
+                                // High friction for a floating dust feel
+                                particle.vx *= 0.84;
+                                particle.vy *= 0.84;
+
+                                particle.x += particle.vx;
+                                particle.y += particle.vy;
+
+                                // Lock if very close or if time is up
+                                if (dist < 0.5 || gatherT >= 1) {
+                                    particle.isLocked = true;
+                                    particle.x = particle.baseX;
+                                    particle.y = particle.baseY;
+                                }
+                                
+                                context.globalAlpha = particle.alpha * (0.4 + ease * 0.6);
+                            } 
+                            // 3. LOCKED / LIVING STATE
+                            else {
+                                // Force particle strictly back to its base position to maintain sharp text
+                                particle.x += (particle.baseX - particle.x) * 0.1;
+                                particle.y += (particle.baseY - particle.y) * 0.1;
+
+                                // Extremely subtle micro-vibration only
+                                const lifeX = Math.sin(now * 0.002 + particle.phase) * 0.05;
+                                const lifeY = Math.cos(now * 0.002 + particle.phase) * 0.05;
+                                
+                                particle.x += lifeX;
+                                particle.y += lifeY;
+
+                                context.globalAlpha = particle.alpha;
                             }
-                        }
 
-                        const drag = movementEnergy > 0 || now < particle.freeUntil ? 0.985 : 0.85; // Original drag balance
-                        particle.vx *= drag;
-                        particle.vy *= drag;
-                        particle.x += particle.vx;
-                        particle.y += particle.vy;
-
-                        context.globalAlpha = particle.alpha;
-                        context.drawImage(circleCanvas, particle.x, particle.y, particle.size, particle.size);
-                    });
-                }
-
+                            context.drawImage(circleCanvas, particle.x, particle.y, particle.size, particle.size);
+                        });
+                    }
                     context.globalAlpha = 1;
                 }
             }
@@ -374,14 +409,37 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && !loopRunning) {
+                    if (!initializedRef.current) {
+                        initializedRef.current = true;
+                        constructionStartTimeRef.current = performance.now();
+                        
+                        // Reset all particles to their starting positions off-screen right
+                        if (canvasRef.current) {
+                            const rect = canvasRef.current.getBoundingClientRect();
+                            const width = rect.width;
+                            const height = rect.height;
+                            particlesRef.current.forEach(p => {
+                                p.x = width + Math.random() * width * 0.8;
+                                p.y = p.baseY + (Math.random() - 0.5) * height * 0.5;
+                                p.vx = -Math.random() * 0.5;
+                                p.vy = (Math.random() - 0.5) * 0.2;
+                                p.isLocked = false;
+                            });
+                        }
+                    }
                     loopRunning = true;
                     animationFrame = requestAnimationFrame(draw);
-                } else if (!entries[0].isIntersecting && loopRunning) {
-                    loopRunning = false;
-                    cancelAnimationFrame(animationFrame);
+                } else if (!entries[0].isIntersecting) {
+                    if (loopRunning) {
+                        loopRunning = false;
+                        cancelAnimationFrame(animationFrame);
+                    }
+                    // Reset animation state when out of view so it replays when scrolled back to
+                    initializedRef.current = false;
+                    particlesRef.current.forEach(p => p.isLocked = false);
                 }
             },
-            { threshold: 0 }
+            { threshold: 0.5 } // Ensure the user has actually scrolled into the section
         );
 
         const wrapper = wrapperRef.current;

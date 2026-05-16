@@ -127,7 +127,7 @@ export default function Hero() {
                     <ParticleText
                         lines={["SCALSET"]}
                         ariaLabel="Scalset"
-                        className="text-[clamp(2.2rem,12vw,5.2rem)] font-bold tracking-[0.3em] md:tracking-[0.75em] uppercase font-[family-name:var(--font-syncopate)]"
+                        className="text-[clamp(1.8rem,10vw,5.2rem)] font-bold tracking-[0.2em] md:tracking-[0.75em] uppercase font-[family-name:var(--font-syncopate)]"
                         yOffset={offsets.text}
                         explode={shouldExplode}
                     />
@@ -203,61 +203,62 @@ export default function Hero() {
             {/* SECTION 2 */}
             <section className="relative min-h-[100dvh] md:min-h-screen overflow-hidden -mt-10 md:-mt-20">
 
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{
-                        once: true,
-                        amount: 0.15,
-                    }}
-                    transition={{
-                        duration: 1,
-                        ease: "easeOut",
-                    }}
-                    className="absolute inset-0"
-                >
+                <div className="absolute inset-0">
                     <ParticleText
-                        lines={
-                            window.innerWidth < 768
-                                ? [
-                                    "On s'occupe de votre équipe.",
-                                    "Vous développez",
-                                    "votre business.",
-                                ]
-                                : [
-                                    "On s'occupe de votre équipe.",
-                                    "Vous développez votre business.",
-                                ]
-                        }
+                        lines={["On s'occupe de votre équipe.", "Vous développez votre business."]}
                         ariaLabel="On s'occupe de votre équipe. Vous développez votre business."
                         className="mx-auto whitespace-nowrap text-[clamp(1.5rem,4.5vw,5.2rem)] font-bold tracking-tighter md:tracking-tighter leading-[1.1] md:leading-[0.98] py-4"
-                        yOffset={window.innerWidth < 768 ? -100 : -50}
+                        yOffset={isMobile ? -100 : -50}
                     />
-                </motion.div>
 
-                {/* CTA */}
+                    {/* SCALSET SIGNATURE ON SECOND PAGE */}
+                    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full h-32 opacity-80 pointer-events-none">
+                        <ParticleText
+                            lines={["SCALSET"]}
+                            ariaLabel="Scalset Signature"
+                            className="text-[clamp(1.2rem,2.5vw,2.8rem)] font-bold tracking-[0.3em] uppercase"
+                            yOffset={0}
+                        />
+                    </div>
+                </div>
+
+                {/* SUBTITLE & CTA */}
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{
-                        once: true,
-                        amount: 0.2,
-                    }}
-                    transition={{
-                        duration: 1,
-                        ease: "easeOut",
-                        delay: 0.35,
-                    }}
-                    className="absolute bottom-24 md:bottom-28 inset-x-0 flex flex-col items-center gap-6 px-6 text-center"
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 1, ease: "easeOut", delay: 0.35 }}
+                    className="absolute bottom-20 md:bottom-24 inset-x-0 flex flex-col items-center gap-8 px-6 text-center"
                 >
-                    <p className="max-w-4xl text-lg md:text-xl lg:text-2xl leading-[1.2] text-transparent bg-clip-text bg-gradient-to-r from-[#E2E8F0] to-[#94A3B8] max-[480px]:text-[0.95rem]">
-                        Nous recrutons, formons et supervisons votre équipe
-                        dans nos locaux, tout en restant pilotée par vous.
-                    </p>
+                    {/* Volumetric Golden Light behind text */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] w-full max-w-4xl h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.35)_0%,transparent_60%)] blur-[30px] pointer-events-none" />
+
+                    <h3 
+                        className="relative z-10 max-w-5xl text-[1.15rem] md:text-[1.6rem] lg:text-[2.1rem] font-bold leading-[1.3] tracking-wide"
+                        style={{
+                            background: "linear-gradient(180deg, #ffffff 0%, #a3a3a3 25%, #4d4d4d 45%, #2b2b2b 50%, #8c8c8c 55%, #e6e6e6 80%, #d4af37 100%)",
+                            WebkitBackgroundClip: "text",
+                            color: "transparent",
+                            filter: "drop-shadow(0px 1px 1px rgba(255,255,255,0.4)) drop-shadow(0px 4px 3px rgba(0,0,0,0.8)) drop-shadow(0px 8px 15px rgba(0,0,0,0.9))"
+                        }}
+                    >
+                        Nous recrutons, formons et supervisons<br/>
+                        votre équipe dans nos locaux, tout en<br/>
+                        restant pilotée par vous.
+                    </h3>
 
                     <SandButton href="#contact">
-                        <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        <svg className="w-6 h-6 md:w-8 md:h-8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="icon-metallic-strong" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stopColor="#ffffff" />
+                                    <stop offset="30%" stopColor="#a3a3a3" />
+                                    <stop offset="50%" stopColor="#4d4d4d" />
+                                    <stop offset="70%" stopColor="#b3b3b3" />
+                                    <stop offset="100%" stopColor="#ffffff" />
+                                </linearGradient>
+                            </defs>
+                            <path fill="url(#icon-metallic-strong)" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                         </svg>
                         Nous Contacter
                     </SandButton>
