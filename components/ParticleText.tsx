@@ -67,6 +67,10 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
     const constructionStartTimeRef = useRef<number>(0);
     const initializedRef = useRef(false);
 
+    const lastWidthRef = useRef<number>(0);
+    const lastHeightRef = useRef<number>(0);
+    const lastYOffsetRef = useRef<number>(0);
+
     const buildParticles = useCallback(() => {
         const wrapper = wrapperRef.current;
         const text = textRef.current;
@@ -77,9 +81,36 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         }
 
         const rect = wrapper.getBoundingClientRect();
-        const textRect = text.getBoundingClientRect();
         const width = Math.max(1, Math.floor(rect.width));
         const height = Math.max(1, Math.floor(rect.height));
+
+        // FAST RESIZE PATH: Smoothly shift particles in real-time without glitching
+        if (particlesRef.current.length > 0 && lastWidthRef.current > 0) {
+            const dx = (width - lastWidthRef.current) / 2;
+            const dy = (height - lastHeightRef.current) / 2 + (yOffset - lastYOffsetRef.current);
+
+            if (dx !== 0 || dy !== 0) {
+                particlesRef.current.forEach((p) => {
+                    p.baseX += dx;
+                    p.baseY += dy;
+                    p.x += dx;
+                    p.y += dy;
+                });
+            }
+
+            const devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.floor(width * devicePixelRatio);
+            canvas.height = Math.floor(height * devicePixelRatio);
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+
+            lastWidthRef.current = width;
+            lastHeightRef.current = height;
+            lastYOffsetRef.current = yOffset;
+            return;
+        }
+
+        const textRect = text.getBoundingClientRect();
         const textOffsetX = textRect.left - rect.left;
         const textOffsetY = textRect.top - rect.top;
         const devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
@@ -168,9 +199,20 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         }
 
         particlesRef.current = particles;
+        lastWidthRef.current = width;
+        lastHeightRef.current = height;
+        lastYOffsetRef.current = yOffset;
+
         // Reset initialization so the animation restarts properly if particles are rebuilt
         initializedRef.current = false;
     }, [lines, yOffset]);
+
+    useEffect(() => {
+        particlesRef.current = [];
+        lastWidthRef.current = 0;
+        lastHeightRef.current = 0;
+        lastYOffsetRef.current = 0;
+    }, [lines]);
 
     // Lazy init: build particles only when section enters viewport
     useEffect(() => {
@@ -193,11 +235,9 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         );
         intersectionObserver.observe(wrapper);
 
-        let resizeTimeout: NodeJS.Timeout;
         const resizeObserver = new ResizeObserver(() => {
             if (initializedRef.current) {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => buildParticles(), 200);
+                buildParticles();
             }
         });
         resizeObserver.observe(wrapper);
@@ -209,7 +249,6 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         return () => {
             intersectionObserver.disconnect();
             resizeObserver.disconnect();
-            clearTimeout(resizeTimeout);
         };
     }, [buildParticles]);
 

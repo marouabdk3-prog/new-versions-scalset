@@ -33,17 +33,17 @@ export default function Hero() {
             const isSquareish = aspect < 1.1;
             
             if (w > 1024 && !isSquareish) {
-                // Desktop: Dynamic proportional offsets to prevent overlap on short/resizing viewports
-                setOffsets({ text: h * 0.25, logo: -h * 0.03, sec2Text: -h * 0.08 });
+                // Desktop: EXACTLY AS ORIGINAL
+                setOffsets({ text: 230, logo: -30, sec2Text: -50 });
             } else if (w >= 768 || (w > 1024 && isSquareish)) {
                 // Tablet or Square Desktop (proportional so it never overlaps)
-                setOffsets({ text: h * 0.30, logo: -h * 0.12, sec2Text: -h * 0.08 });
+                setOffsets({ text: h * 0.30, logo: -h * 0.12, sec2Text: -50 });
             } else if (isPortraitMobile) {
                 // Mobile Portrait - even closer gap for better composition
-                setOffsets({ text: h * 0.24, logo: -h * 0.09, sec2Text: -h * 0.12 });
+                setOffsets({ text: h * 0.24, logo: -h * 0.09, sec2Text: -100 });
             } else {
                 // Mobile Landscape
-                setOffsets({ text: h * 0.28, logo: -h * 0.20, sec2Text: -h * 0.15 });
+                setOffsets({ text: h * 0.28, logo: -h * 0.20, sec2Text: -100 });
             }
         };
 
