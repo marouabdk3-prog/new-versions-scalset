@@ -19,7 +19,7 @@ export default function Hero() {
     const explodeFiredRef = useRef(false);
 
     const [isMobile, setIsMobile] = useState(false);
-    const [offsets, setOffsets] = useState({ text: 230, logo: -30 });
+    const [offsets, setOffsets] = useState({ text: 230, logo: -30, sec2Text: -50 });
 
     useEffect(() => {
         const updateLayout = () => {
@@ -29,22 +29,21 @@ export default function Hero() {
 
             const isPortraitMobile = w < 768 && h > w;
             const isLandscapeMobile = h < 500;
-            
             const aspect = w / h;
             const isSquareish = aspect < 1.1;
-
+            
             if (w > 1024 && !isSquareish) {
-                // Desktop: EXACTLY AS ORIGINAL
-                setOffsets({ text: 230, logo: -30 });
+                // Desktop: Dynamic proportional offsets to prevent overlap on short/resizing viewports
+                setOffsets({ text: h * 0.25, logo: -h * 0.03, sec2Text: -h * 0.08 });
             } else if (w >= 768 || (w > 1024 && isSquareish)) {
                 // Tablet or Square Desktop (proportional so it never overlaps)
-                setOffsets({ text: h * 0.30, logo: -h * 0.12 });
+                setOffsets({ text: h * 0.30, logo: -h * 0.12, sec2Text: -h * 0.08 });
             } else if (isPortraitMobile) {
                 // Mobile Portrait - even closer gap for better composition
-                setOffsets({ text: h * 0.24, logo: -h * 0.09 });
+                setOffsets({ text: h * 0.24, logo: -h * 0.09, sec2Text: -h * 0.12 });
             } else {
                 // Mobile Landscape
-                setOffsets({ text: h * 0.28, logo: -h * 0.20 });
+                setOffsets({ text: h * 0.28, logo: -h * 0.20, sec2Text: -h * 0.15 });
             }
         };
 
@@ -111,7 +110,7 @@ export default function Hero() {
     return (
         <>
             {/* HERO */}
-            <section className="relative h-[100svh] overflow-hidden">
+            <section className="relative h-screen overflow-hidden">
 
                 {/* PARTICLE TEXT (SAND) */}
                 <motion.div
@@ -201,18 +200,18 @@ export default function Hero() {
             </section>
 
             {/* SECTION 2 */}
-            <section className="relative min-h-[100dvh] md:min-h-screen overflow-hidden -mt-10 md:-mt-20">
+            <section className="relative min-h-screen overflow-hidden -mt-10 md:-mt-20">
 
                 <div className="absolute inset-0">
                     <ParticleText
                         lines={["On s'occupe de votre équipe.", "Vous développez votre business."]}
                         ariaLabel="On s'occupe de votre équipe. Vous développez votre business."
                         className="mx-auto whitespace-nowrap text-[clamp(1.5rem,4.5vw,5.2rem)] font-bold tracking-tighter md:tracking-tighter leading-[1.1] md:leading-[0.98] py-4"
-                        yOffset={isMobile ? -100 : -50}
+                        yOffset={offsets.sec2Text}
                     />
 
                     {/* SCALSET SIGNATURE ON SECOND PAGE */}
-                    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full h-32 opacity-80 pointer-events-none">
+                    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full h-32 opacity-80 pointer-events-none hidden md:block">
                         <ParticleText
                             lines={["SCALSET"]}
                             ariaLabel="Scalset Signature"

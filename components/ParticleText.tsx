@@ -170,7 +170,7 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         particlesRef.current = particles;
         // Reset initialization so the animation restarts properly if particles are rebuilt
         initializedRef.current = false;
-    }, [lines]);
+    }, [lines, yOffset]);
 
     // Lazy init: build particles only when section enters viewport
     useEffect(() => {

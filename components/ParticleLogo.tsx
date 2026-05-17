@@ -162,7 +162,7 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
             // Reset initialization so the animation restarts properly if particles are rebuilt
             initializedRef.current = false;
         };
-    }, [src]);
+    }, [src, yOffset]);
 
     useEffect(() => {
         buildParticles();
