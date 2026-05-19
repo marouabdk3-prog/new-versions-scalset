@@ -298,3 +298,14 @@ body {
 .animate-pulseSilver {
   animation: pulseSilver 3.8s ease-in-out infinite;
 }
+
+@keyframes sky-drift {
+  0%   { transform: scale(1.06) translate(0%,    0%); }
+  33%  { transform: scale(1.06) translate(-1.8%, -0.3%); }
+  66%  { transform: scale(1.06) translate(-3.0%, -0.1%); }
+  100% { transform: scale(1.06) translate(0%,    0%); }
+}
+
+.animate-sky-drift {
+  animation: sky-drift 50s ease-in-out infinite;
+}

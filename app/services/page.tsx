@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
     ArrowRight,
     Handshake,
@@ -31,16 +32,16 @@ const whys = [
 ];
 
 const profiles = [
-    { title: "Closer", description: "Conversion de prospects et closing des ventes à haute valeur ajoutée.", icon: Handshake },
-    { title: "Setter", description: "Qualification des contacts, prospection et génération de rendez-vous qualifiés.", icon: CalendarDays },
-    { title: "Community Manager", description: "Gestion et animation de vos communautés sur l'ensemble des réseaux sociaux.", icon: Users },
-    { title: "Copywriter", description: "Rédaction de textes persuasifs pour vos pages de vente, emails et publicités.", icon: PenTool },
-    { title: "Designer graphique", description: "Création d'identités visuelles, publications et supports de communication percutants.", icon: Palette },
-    { title: "Vidéaste", description: "Montage vidéo dynamique (réels, TikToks) pour vos réseaux sociaux et publicités.", icon: Film },
-    { title: "Assistant de direction", description: "Gestion administrative, organisation des plannings et support quotidien de l'exécutif.", icon: Briefcase },
-    { title: "Support client", description: "Assistance réactive, gestion des litiges et fidélisation de vos clients.", icon: Headset },
-    { title: "Développeur Web", description: "Création, maintenance et optimisation de vos sites web, pages de capture et applications.", icon: Code },
-    { title: "Media buyer", description: "Création, gestion et optimisation de vos campagnes d'acquisition payantes sur toutes les plateformes.", icon: Target },
+    { title: "Closer", description: "Conversion de prospects et closing des ventes à haute valeur ajoutée.", icon: Handshake, image: "/closer.webp" },
+    { title: "Setter", description: "Qualification des contacts, prospection et génération de rendez-vous qualifiés.", icon: CalendarDays, image: "/setter.webp" },
+    { title: "Community Manager", description: "Gestion et animation de vos communautés sur l'ensemble des réseaux sociaux.", icon: Users, image: "/31.jpeg", objectPosition: "center 30%" },
+    { title: "Copywriter", description: "Rédaction de textes persuasifs pour vos pages de vente, emails et publicités.", icon: PenTool, image: "/copy writer.jpeg" },
+    { title: "Designer graphique", description: "Création d'identités visuelles, publications et supports de communication percutants.", icon: Palette, image: "/Graphique.jpeg" },
+    { title: "Vidéaste", description: "Montage vidéo dynamique (réels, TikToks) pour vos réseaux sociaux et publicités.", icon: Film, image: "/Vidéaste.jpeg" },
+    { title: "Assistant de direction", description: "Gestion administrative, organisation des plannings et support quotidien de l'exécutif.", icon: Briefcase, image: "/Assistant de direction.jpeg", objectPosition: "center 30%" },
+    { title: "Support client", description: "Assistance réactive, gestion des litiges et fidélisation de vos clients.", icon: Headset, image: "/Support client.jpeg" },
+    { title: "Développeur Web", description: "Création, maintenance et optimisation de vos sites web, pages de capture et applications.", icon: Code, image: "/Développeur Web.jpeg" },
+    { title: "Media buyer", description: "Création, gestion et optimisation de vos campagnes d'acquisition payantes sur toutes les plateformes.", icon: Target, image: "/Media buyer.jpeg" },
 ];
 
 const processSteps = [
@@ -143,6 +144,39 @@ export default function Services() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {profiles.map((profile, i) => {
                             const Icon = profile.icon;
+                            if (profile.image) {
+                                return (
+                                    <motion.div
+                                        key={i}
+                                        custom={i}
+                                        variants={fadeUp}
+                                        initial="hidden"
+                                        whileInView="show"
+                                        viewport={{ once: true, margin: "-40px" }}
+                                        className={`group flex flex-col rounded-[1.25rem] bg-[#0d0d14] border border-white/10 overflow-hidden transition-all duration-500 h-72 relative hover:border-white/40 hover:shadow-[0_0_30px_rgba(212,175,55,0.25),inset_0_0_0_1px_rgba(255,255,255,0.15)] ${i === 8 ? "lg:col-start-2" : ""}`}
+                                    >
+                                        <div className="relative flex-1 w-full overflow-hidden">
+                                            <Image
+                                                src={profile.image}
+                                                alt={profile.title}
+                                                fill
+                                                sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+                                                className="object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                                                style={{ objectPosition: profile.objectPosition ?? "center center" }}
+                                            />
+                                            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0d0d14] to-transparent z-10" />
+                                            <div className="absolute inset-0 bg-[#0d0d14]/80 backdrop-blur-md z-20 flex items-center justify-center p-6 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                                <p className="text-white text-sm leading-relaxed translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                                    {profile.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="px-3 py-4 flex items-center justify-center text-center relative z-30 bg-[#0d0d14] h-[72px] shrink-0">
+                                            <h4 className="text-white font-bold text-base md:text-lg">{profile.title}</h4>
+                                        </div>
+                                    </motion.div>
+                                );
+                            }
                             return (
                                 <motion.div
                                     key={i}

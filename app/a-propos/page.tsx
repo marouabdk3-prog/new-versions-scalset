@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 const cards = [
     {
@@ -23,56 +24,119 @@ const cards = [
 
 import OrganizationChart from "@/components/OrganizationChart";
 
-// Custom Scroll Reveal Text Component
-function ScrollRevealWord({
-    word,
-    index,
-    total,
-    progress,
-}: {
-    word: string;
-    index: number;
-    total: number;
-    progress: MotionValue<number>;
-}) {
-    const start = index / total;
-    const end = start + (1 / total);
-    const opacity = useTransform(progress, [start, end], [0.1, 1]);
-    const filter = useTransform(progress, [start, end], ["blur(10px)", "blur(0px)"]);
+const missionPhotos = ["/01.jpeg", "/02.jpeg", "/03.jpeg"];
+
+function MissionCard() {
+    const [revealed, setRevealed] = useState(false);
 
     return (
-        <motion.span
-            style={{ opacity, filter }}
-            className="text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-300"
-        >
-            {word}
-        </motion.span>
-    );
-}
+        <section className="py-16 lg:py-24">
+            <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-center">
 
-function ScrollRevealText({ text }: { text: string }) {
-    // ... remaining imports left out, just adding the component ...
+                {/* LEFT: Text Card */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="lg:w-1/2 w-full relative rounded-3xl p-8 md:p-12 flex flex-col gap-7 overflow-hidden"
+                    style={{
+                        background: "rgba(6,6,12,0.75)",
+                        backdropFilter: "blur(24px)",
+                        WebkitBackdropFilter: "blur(24px)",
+                        border: "1px solid rgba(212,175,55,0.18)",
+                        boxShadow: "0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.12)",
+                    }}
+                >
+                    {/* Gold top highlight */}
+                    <div className="absolute inset-x-0 top-0 h-px pointer-events-none"
+                        style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)" }} />
 
-    const textRef = useRef<HTMLHeadingElement>(null);
-    const { scrollYProgress } = useScroll({
-        target: textRef,
-        offset: ["start 80%", "end 50%"]
-    });
+                    <span className="text-xs font-bold uppercase tracking-[0.25em]" style={{ color: "#d4af37" }}>
+                        Notre Mission
+                    </span>
 
-    const words = text.split(" ");
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] tracking-tight">
+                        L&apos;ambition<br />qui nous{" "}
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 to-slate-500 italic pr-1">
+                            définit.
+                        </span>
+                    </h2>
 
-    return (
-        <h2 ref={textRef} className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white/10 leading-[1.4] flex flex-wrap gap-x-3 md:gap-x-4 gap-y-2">
-            {words.map((word, i) => (
-                <ScrollRevealWord
-                    key={`${word}-${i}`}
-                    word={word}
-                    index={i}
-                    total={words.length}
-                    progress={scrollYProgress}
-                />
-            ))}
-        </h2>
+                    <p className="text-slate-300 text-base md:text-lg leading-relaxed max-w-md">
+                        Chez SCALSET, notre ambition est simple : vous permettre de réussir avec les bons outils et les bonnes personnes. Nous veillons à offrir à nos équipes des conditions de travail sérieuses et valorisantes, pour vous apporter une vraie stabilité sur le long terme.
+                    </p>
+
+                    <div className="w-12 h-px" style={{ background: "rgba(212,175,55,0.4)" }} />
+
+                    <div className="flex gap-10">
+                        {[["100%", "Dédiés"], ["24/7", "Disponibles"], ["0%", "Compromis"]].map(([val, label]) => (
+                            <div key={label}>
+                                <p className="text-2xl font-black text-white">{val}</p>
+                                <p className="text-xs uppercase tracking-widest text-slate-500 mt-1">{label}</p>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* RIGHT: Floating Photos */}
+                <div
+                    className="lg:w-1/2 w-full"
+                    onMouseEnter={() => setRevealed(true)}
+                    onMouseLeave={() => setRevealed(false)}
+                    onTouchStart={() => setRevealed(true)}
+                >
+                    {/* Mobile: simple grid */}
+                    <div className="grid grid-cols-3 gap-3 lg:hidden">
+                        {missionPhotos.map((src, i) => (
+                            <motion.div
+                                key={i}
+                                animate={revealed ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+                                transition={{ delay: revealed ? i * 0.18 : (2 - i) * 0.08, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                                className="relative rounded-xl overflow-hidden aspect-[3/4]"
+                                style={{ boxShadow: "0 10px 30px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}
+                            >
+                                <Image src={src} alt={`ScalSet ${i + 1}`} fill className="object-cover" sizes="30vw" />
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    {/* Desktop: cascading stacked cards */}
+                    <div className="hidden lg:block relative" style={{ height: 420 }}>
+                        {missionPhotos.map((src, i) => {
+                            const configs = [
+                                { top: 0,   left: "0%",  width: "68%", rotate: "-3deg", zIndex: 3 },
+                                { top: 50,  left: "16%", width: "68%", rotate: "0deg",  zIndex: 2 },
+                                { top: 100, left: "32%", width: "68%", rotate: "3deg",  zIndex: 1 },
+                            ];
+                            const c = configs[i];
+                            return (
+                                <motion.div
+                                    key={i}
+                                    animate={revealed ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
+                                    transition={{ delay: revealed ? i * 0.2 : (2 - i) * 0.08, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                                    className="absolute rounded-2xl overflow-hidden"
+                                    style={{
+                                        top: c.top,
+                                        left: c.left,
+                                        width: c.width,
+                                        aspectRatio: "4/3",
+                                        transform: `rotate(${c.rotate})`,
+                                        zIndex: c.zIndex,
+                                        boxShadow: "0 24px 60px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.07)",
+                                    }}
+                                >
+                                    <Image src={src} alt={`ScalSet ${i + 1}`} fill className="object-cover" sizes="40vw" />
+                                    <div className="absolute inset-0 pointer-events-none"
+                                        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%, rgba(0,0,0,0.18) 100%)" }} />
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+            </div>
+        </section>
     );
 }
 
@@ -144,13 +208,32 @@ export default function APropos() {
                         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                         className="flex flex-col items-center gap-8"
                     >
-                        <div className="px-6 py-2 rounded-full border-2 border-slate-200/30 bg-white/[0.03] backdrop-blur-md shadow-[0_0_20px_rgba(226,232,240,0.05)]">
-                            <span className="text-xs lg:text-sm font-semibold tracking-[0.2em] uppercase text-slate-400">ScalSet Identity</span>
+                        <div className="relative inline-flex items-center justify-center">
+                            <div className="absolute inset-0 rounded-[999px] bg-[#d4af37]/30 blur-xl pointer-events-none" />
+                            <div
+                                className="relative rounded-[999px] p-[2px] shadow-[0_10px_30px_rgba(212,175,55,0.4)]"
+                                style={{ background: "linear-gradient(180deg, #ffffff 0%, #a3a3a3 20%, #4d4d4d 50%, #d4af37 80%, #ffdf73 100%)" }}
+                            >
+                                <div className="relative px-6 py-2.5 flex items-center justify-center rounded-[999px] bg-gradient-to-b from-black/80 to-[#1a1a1a] backdrop-blur-md">
+                                    <div className="absolute inset-0 rounded-[999px] shadow-[inset_0_1px_2px_rgba(255,255,255,0.2),inset_0_-1px_3px_rgba(212,175,55,0.3)] pointer-events-none" />
+                                    <span
+                                        className="relative z-10 text-xs lg:text-sm font-bold tracking-[0.2em] uppercase"
+                                        style={{
+                                            background: "linear-gradient(180deg, #ffffff 0%, #a3a3a3 25%, #4d4d4d 45%, #2b2b2b 50%, #8c8c8c 55%, #e6e6e6 80%, #d4af37 100%)",
+                                            WebkitBackgroundClip: "text",
+                                            backgroundClip: "text",
+                                            color: "transparent",
+                                        }}
+                                    >
+                                        ScalSet Identity
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                         <h1 className="text-6xl md:text-8xl lg:text-[8.5rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#F8FAFC] via-[#E2E8F0] to-[#64748B] leading-[0.9] pb-4 drop-shadow-2xl">
                             L&apos;Exécution<br />Comme Art.
                         </h1>
-                        <p className="text-slate-400 text-lg md:text-xl lg:text-2xl max-w-3xl font-light leading-relaxed">
+                        <p className="text-[#d8d8d8] text-lg md:text-xl lg:text-2xl max-w-3xl font-bold leading-relaxed">
                             Notre expertise en outsourcing nous permet de fournir à des structures la possibilité d’être parmi
                             les plus compétitives et les plus efficaces sur le marché mondial.
                         </p>
@@ -159,10 +242,8 @@ export default function APropos() {
 
                 </section>
 
-                {/* 2. KINETIC TYPOGRAPHY MISSION */}
-                <section className="min-h-[80vh] flex items-center py-32 lg:py-48">
-                    <ScrollRevealText text="Chez SCALSET, notre ambition est simple: vous permettre de réussir avec les bons outils et les bonnes personnes. En parallèle, nous veillons à offrir à nos équipes des conditions de travail sérieuses et valorisantes, pour qu’elles puissent évoluer et vous apporter une vraie stabilité pour performer et construire sur le long terme." />
-                </section>
+                {/* 2. MISSION BLOG CARD */}
+                <MissionCard />
 
 
                 {/* 3. STICKY STACKING CARDS (THE METHODOLOGY) */}

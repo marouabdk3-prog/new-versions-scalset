@@ -33,11 +33,13 @@ type ParticleLogoProps = {
     explode?: boolean;
     onExplodeComplete?: () => void;
     yOffset?: number;
+    exitLeft?: boolean;
+    onExitLeftComplete?: () => void;
 };
 
 const EXPLOSION_DURATION = 800;
 
-export default function ParticleLogo({ src, alt, className, explode, onExplodeComplete, yOffset = 0 }: ParticleLogoProps) {
+export default function ParticleLogo({ src, alt, className, explode, onExplodeComplete, yOffset = 0, exitLeft, onExitLeftComplete }: ParticleLogoProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const particlesRef = useRef<Particle[]>([]);
@@ -65,7 +67,19 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
     }>({ active: false, startTime: 0, notified: false });
     const onExplodeCompleteRef = useRef(onExplodeComplete);
     onExplodeCompleteRef.current = onExplodeComplete;
-    
+
+    const exitLeftRef = useRef(exitLeft);
+    exitLeftRef.current = exitLeft;
+
+    const exitLeftStateRef = useRef<{
+        active: boolean;
+        startTime: number;
+        notified: boolean;
+    }>({ active: false, startTime: 0, notified: false });
+
+    const onExitLeftCompleteRef = useRef(onExitLeftComplete);
+    onExitLeftCompleteRef.current = onExitLeftComplete;
+
     const constructionStartTimeRef = useRef<number>(0);
     const initializedRef = useRef(false);
 
@@ -229,6 +243,13 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
     }, [explode]);
 
     useEffect(() => {
+        if (!exitLeft && exitLeftStateRef.current.active) {
+            exitLeftStateRef.current.active = false;
+            exitLeftStateRef.current.notified = false;
+        }
+    }, [exitLeft]);
+
+    useEffect(() => {
         let animationFrame = 0;
         let loopRunning = false;
 
@@ -248,8 +269,8 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
             const canvas = canvasRef.current;
             const particles = particlesRef.current;
             const now = performance.now();
-            const pointer = pointerRef.current;
             const explodeState = explodeStateRef.current;
+            const exitLeftState = exitLeftStateRef.current;
 
             if (canvas) {
                 const context = canvas.getContext("2d");
@@ -260,7 +281,25 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
                     context.clearRect(0, 0, canvas.width / ratio, canvas.height / ratio);
                     context.fillStyle = "#E2E8F0";
 
-                    if (explodeRef.current && !explodeState.active && particles.length > 0) {
+                    if (exitLeftRef.current && !exitLeftState.active && !explodeState.active && particles.length > 0) {
+                        exitLeftState.active = true;
+                        exitLeftState.startTime = now;
+                        exitLeftState.notified = false;
+
+                        const exitRect = canvas.getBoundingClientRect();
+                        const canvasW = exitRect.width;
+
+                        particles.forEach((particle) => {
+                            const speed = 12 + Math.random() * 8;
+                            particle.vx = -speed;
+                            particle.vy = (Math.random() - 0.5) * 3;
+                            // miroir de l'entrée : droite part en premier
+                            particle.delay = ((canvasW - particle.baseX) / canvasW) * 100 + Math.random() * 40;
+                            particle.isLocked = false;
+                        });
+                    }
+
+                    if (explodeRef.current && !explodeState.active && !exitLeftState.active && particles.length > 0) {
                         explodeState.active = true;
                         explodeState.startTime = now;
                         explodeState.notified = false;
@@ -285,7 +324,38 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
                         });
                     }
 
-                    if (explodeState.active) {
+                    if (exitLeftState.active) {
+                        const elapsed = now - exitLeftState.startTime;
+
+                        particles.forEach((particle) => {
+                            const particleElapsed = elapsed - particle.delay;
+
+                            if (particleElapsed <= 0) {
+                                context.globalAlpha = particle.alpha;
+                                context.drawImage(circleCanvas, particle.x, particle.y, particle.size, particle.size);
+                                return;
+                            }
+
+                            particle.vx *= 0.985;
+                            particle.x += particle.vx;
+                            particle.y += particle.vy;
+
+                            const fadeProgress = Math.min(particleElapsed / 450, 1);
+                            const alphaMultiplier = Math.max(0, 1 - Math.pow(fadeProgress, 1.3));
+
+                            if (alphaMultiplier > 0.01) {
+                                context.globalAlpha = particle.alpha * alphaMultiplier;
+                                context.drawImage(circleCanvas, particle.x, particle.y, particle.size, particle.size);
+                            }
+                        });
+
+                        context.globalAlpha = 1;
+
+                        if (elapsed >= 800 && !exitLeftState.notified) {
+                            exitLeftState.notified = true;
+                            onExitLeftCompleteRef.current?.();
+                        }
+                    } else if (explodeState.active) {
                         const elapsed = now - explodeState.startTime;
                         const t = Math.min(elapsed / EXPLOSION_DURATION, 1);
 
@@ -341,11 +411,11 @@ export default function ParticleLogo({ src, alt, className, explode, onExplodeCo
                                 const gatherT = Math.min(particleElapsed / 1000, 1);
                                 // Very soft ease-out for a gentle landing
                                 const ease = 1 - Math.pow(1 - gatherT, 4);
-                                
+
                                 const pullForce = 0.015 + ease * 0.08;
                                 particle.vx += dx * pullForce;
                                 particle.vy += dy * pullForce;
-                                
+
                                 // High friction for a floating dust feel
                                 particle.vx *= 0.84;
                                 particle.vy *= 0.84;

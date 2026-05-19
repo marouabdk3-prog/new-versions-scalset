@@ -19,115 +19,156 @@ export default function Header() {
     const { scrollY } = useScroll();
     const { navLogoRef, navLogoVisible } = useLogoAnimation();
 
-    // Subtle scale pulse in first 160px of scroll, then resets to 1
     const logoScale = useTransform(scrollY, [0, 80, 160], [1, 1.08, 1]);
 
     return (
-        <motion.header
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-            className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-8 py-3 bg-gradient-to-b from-[#090911]/90 to-transparent backdrop-blur-[2px]"
-        >
-            {/* Logo — hidden during rocket launch, revealed on arrival */}
-            <motion.div
-                ref={navLogoRef}
-                style={{ scale: logoScale, transformOrigin: "left center" }}
-                className="flex-shrink-0"
-                animate={{ opacity: navLogoVisible ? 1 : 0 }}
-                transition={{
-                    opacity: {
-                        duration: navLogoVisible ? 0.3 : 0,
-                        ease: "easeOut",
-                    },
+        <div className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pt-3 sm:pt-4">
+
+            {/* ── FLOATING NAVBAR ── */}
+            <motion.header
+                initial={{ y: -100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                className="group relative w-full flex items-center justify-between px-4 md:px-6 py-1.5 rounded-xl overflow-hidden"
+                style={{
+                    background: "rgba(0, 0, 0, 0)",
+                    backdropFilter: "none",
+                    WebkitBackdropFilter: "none",
+                    border: "1px solid rgba(255,255,255,0)",
+                    boxShadow: "none",
+                    transition: "background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease",
                 }}
             >
-                <Link
-                    href="/"
-                    className="focus:outline-none relative block w-32 md:w-44 sm:w-70 lg:w-[21.8rem] h-15 md:h-20 flex items-center"
-                >
-                    <Image
-                        src="/SCALSET-1.ico"
-                        alt="ScalSet Logo"
-                        fill
-                        sizes="(min-width: 1024px) 350px, (min-width: 768px) 176px, 128px"
-                        className="object-contain object-left scale-[2.8] origin-left"
-                        priority
-                    />
-                </Link>
-            </motion.div>
+                {/* Bottom luminous ribbon — appears on navbar hover */}
+                <div
+                    className="absolute inset-x-0 bottom-0 h-px pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                        background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 15%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.3) 85%, transparent 100%)",
+                    boxShadow: "0 0 12px 2px rgba(255,255,255,0.6), 0 0 30px 6px rgba(255,255,255,0.2)"
+                    }}
+                />
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-10 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                {navItems.map((item) => (
+                {/* Inner ambient glow from top */}
+                <div
+                    className="absolute inset-0 pointer-events-none rounded-2xl"
+                    style={{
+                        background: "radial-gradient(ellipse 80% 40% at 50% -10%, rgba(255,255,255,0.04) 0%, transparent 70%)"
+                    }}
+                />
+
+                {/* ── LOGO ── */}
+                <motion.div
+                    ref={navLogoRef}
+                    style={{ scale: logoScale, transformOrigin: "left center" }}
+                    className="shrink-0 relative z-10"
+                    animate={{ opacity: navLogoVisible ? 1 : 0 }}
+                    transition={{
+                        opacity: {
+                            duration: navLogoVisible ? 0.3 : 0,
+                            ease: "easeOut",
+                        },
+                    }}
+                >
                     <Link
-                        key={item.href}
-                        href={item.href}
-                        className="relative group py-2"
+                        href="/"
+                        className="focus:outline-none relative block w-32 md:w-44 lg:w-[21.8rem] h-15 md:h-20"
                     >
-                        <motion.span
-                            initial="rest"
-                            whileHover="hover"
-                            animate="rest"
-                            className="text-sm font-bold text-neutral-400 group-hover:text-white transition-colors relative flex flex-col items-center"
+                        <Image
+                            src="/SCALSET-1.ico"
+                            alt="ScalSet Logo"
+                            fill
+                            sizes="(min-width: 1024px) 350px, (min-width: 768px) 176px, 128px"
+                            className="object-contain object-left scale-[2.8] origin-left"
+                            priority
+                        />
+                    </Link>
+                </motion.div>
+
+                {/* ── DESKTOP NAV ── */}
+                <nav className="hidden md:flex items-center gap-10 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className="relative group py-2"
                         >
-                            <motion.span
-                                variants={{
-                                    rest: { y: 0 },
-                                    hover: { y: -2 }
-                                }}
-                                transition={{ duration: 0.2 }}
+                            <span
+                                className="text-base font-bold tracking-[0.2em] uppercase transition-opacity duration-300 hover:opacity-70"
+                                style={{ color: "#c8c8c8" }}
                             >
                                 {item.name}
-                            </motion.span>
-                            <motion.span
-                                className="absolute -bottom-1 left-0 w-full h-0.5 bg-white origin-left"
-                                variants={{
-                                    rest: { scaleX: 0 },
-                                    hover: { scaleX: 1 }
-                                }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                            />
+                            </span>
+                        </Link>
+                    ))}
+                </nav>
+
+                {/* ── MOBILE TOGGLE ── */}
+                <button
+                    className="md:hidden text-slate-400 hover:text-white p-2 relative z-10 transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    aria-label="Toggle menu"
+                >
+                    <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                            key={isMobileMenuOpen ? "close" : "open"}
+                            initial={{ rotate: -90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            exit={{ rotate: 90, opacity: 0 }}
+                            transition={{ duration: 0.18 }}
+                        >
+                            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
                         </motion.span>
-                    </Link>
-                ))}
-            </nav>
+                    </AnimatePresence>
+                </button>
+            </motion.header>
 
-            {/* Mobile Menu Toggle */}
-            <button
-                className="md:hidden text-white p-2 relative z-50"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-                {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-            </button>
-
+            {/* ── MOBILE DROPDOWN ── */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="absolute top-full left-0 right-0 bg-[#090911]/95 backdrop-blur-md border-b border-white/10 flex flex-col items-center gap-4 py-8 md:hidden z-40 overflow-hidden"
+                        initial={{ opacity: 0, y: -8, scaleY: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scaleY: 1 }}
+                        exit={{ opacity: 0, y: -8, scaleY: 0.95 }}
+                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                        className="mt-2 rounded-2xl overflow-hidden origin-top"
+                        style={{
+                            background: "rgba(6, 6, 12, 0.92)",
+                            backdropFilter: "blur(28px) saturate(170%)",
+                            WebkitBackdropFilter: "blur(28px) saturate(170%)",
+                            border: "1px solid rgba(255,255,255,0.09)",
+                            boxShadow: "0 24px 64px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.08)",
+                        }}
                     >
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="text-xl font-bold text-neutral-400 hover:text-white transition-colors py-2 w-full text-center"
-                            >
-                                <motion.span
-                                    whileTap={{ scale: 0.95 }}
-                                    className="inline-block"
+                        {/* Top reflective line */}
+                        <div
+                            className="h-px w-full pointer-events-none"
+                            style={{
+                                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 50%, transparent)"
+                            }}
+                        />
+
+                        <div className="flex flex-col items-center gap-1 py-5 px-3">
+                            {navItems.map((item, i) => (
+                                <motion.div
+                                    key={item.href}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.055, duration: 0.2, ease: "easeOut" }}
+                                    className="w-full"
                                 >
-                                    {item.name}
-                                </motion.span>
-                            </Link>
-                        ))}
+                                    <Link
+                                        href={item.href}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="block text-center py-3 px-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-slate-400 hover:text-white transition-colors duration-200 rounded-xl hover:bg-white/5"
+                                    >
+                                        {item.name}
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </motion.header>
+        </div>
     );
 }
