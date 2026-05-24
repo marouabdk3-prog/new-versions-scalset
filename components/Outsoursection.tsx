@@ -125,7 +125,7 @@ export default function Outsoursection() {
                         variants={fadeUp}
                     >
                         <motion.a
-                            href="#contact"
+                            href="/contact"
                             whileHover={{ scale: 1.04, boxShadow: "0 0 20px rgba(226,232,240,0.15)" }}
                             whileTap={{ scale: 0.97 }}
                             className="btn-shiny transition-all text-lg"
@@ -159,7 +159,7 @@ export default function Outsoursection() {
                     whileInView="visible"
                     viewport={VIEWPORT}
                     variants={fadeRight}
-                    className="hidden lg:block relative w-full aspect-[3/4] rounded-2xl overflow-hidden ring-1 ring-white/10 lg:mt-25"
+                    className="hidden lg:block relative w-full aspect-[3/4] rounded-2xl overflow-hidden ring-1 ring-white/10 lg:mt-24"
                 >
                     <Image
                         src="/hero-img3.png"

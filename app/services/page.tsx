@@ -146,35 +146,39 @@ export default function Services() {
                             const Icon = profile.icon;
                             if (profile.image) {
                                 return (
-                                    <motion.div
+                                    <div
                                         key={i}
-                                        custom={i}
-                                        variants={fadeUp}
-                                        initial="hidden"
-                                        whileInView="show"
-                                        viewport={{ once: true, margin: "-40px" }}
-                                        className={`group flex flex-col rounded-[1.25rem] bg-[#0d0d14] border border-white/10 overflow-hidden transition-all duration-500 h-72 relative hover:border-white/40 hover:shadow-[0_0_30px_rgba(212,175,55,0.25),inset_0_0_0_1px_rgba(255,255,255,0.15)] ${i === 8 ? "lg:col-start-2" : ""}`}
+                                        className={`closer-card-wrapper${i === 8 ? " lg:col-start-2" : ""}`}
                                     >
-                                        <div className="relative flex-1 w-full overflow-hidden">
-                                            <Image
-                                                src={profile.image}
-                                                alt={profile.title}
-                                                fill
-                                                sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
-                                                className="object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
-                                                style={{ objectPosition: profile.objectPosition ?? "center center" }}
-                                            />
-                                            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0d0d14] to-transparent z-10" />
-                                            <div className="absolute inset-0 bg-[#0d0d14]/80 backdrop-blur-md z-20 flex items-center justify-center p-6 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                                <p className="text-white text-sm leading-relaxed translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                                    {profile.description}
-                                                </p>
+                                        <motion.div
+                                            custom={i}
+                                            variants={fadeUp}
+                                            initial="hidden"
+                                            whileInView="show"
+                                            viewport={{ once: true, margin: "-40px" }}
+                                            className="group flex flex-col rounded-[1.25rem] bg-[#0d0d14] overflow-hidden transition-all duration-500 h-72 relative"
+                                        >
+                                            <div className="relative flex-1 w-full overflow-hidden">
+                                                <Image
+                                                    src={profile.image}
+                                                    alt={profile.title}
+                                                    fill
+                                                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+                                                    className="object-cover opacity-100 group-hover:scale-110 transition-all duration-700"
+                                                    style={{ objectPosition: profile.objectPosition ?? "center center" }}
+                                                />
+                                                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0d0d14] to-transparent z-10" />
+                                                <div className="absolute inset-0 bg-[#0d0d14]/80 backdrop-blur-md z-20 flex items-center justify-center p-6 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                                    <p className="text-white text-sm leading-relaxed translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                                        {profile.description}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="px-3 py-4 flex items-center justify-center text-center relative z-30 bg-[#0d0d14] h-[72px] shrink-0">
-                                            <h4 className="text-white font-bold text-base md:text-lg">{profile.title}</h4>
-                                        </div>
-                                    </motion.div>
+                                            <div className="px-3 py-4 flex items-center justify-center text-center relative z-30 bg-[#0d0d14] h-[72px] shrink-0">
+                                                <h4 className="text-white font-bold text-base md:text-lg">{profile.title}</h4>
+                                            </div>
+                                        </motion.div>
+                                    </div>
                                 );
                             }
                             return (
@@ -214,7 +218,7 @@ export default function Services() {
                             Et si vos besoins sont spécifiques, nous pouvons constituer une équipe entièrement personnalisée, adaptée à votre activité. Nous disposons d&apos;un répertoire complet de profils capables de couvrir tout ce qui peut se faire en ligne.
                         </p>
                         <Link
-                            href="#contact"
+                            href="/contact"
                             className="relative z-10 shrink-0 inline-flex items-center gap-3 bg-white text-black font-semibold rounded-full px-8 py-4 hover:bg-slate-100 transition-colors duration-200"
                         >
                             Nous contacter
@@ -284,7 +288,7 @@ export default function Services() {
                         className="flex justify-center"
                     >
                         <Link
-                            href="#contact"
+                            href="/contact"
                             className="inline-flex items-center gap-3 bg-white text-black font-semibold rounded-full px-10 py-5 hover:bg-slate-100 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
                         >
                             Nous contacter
@@ -325,7 +329,7 @@ export default function Services() {
                             className="mt-4 flex justify-center relative z-10"
                         >
                             <Link
-                                href="#contact"
+                                href="/contact"
                                 className="inline-flex items-center gap-3 bg-white text-black font-semibold rounded-full px-10 py-5 hover:bg-slate-100 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
                             >
                                 Démarrer la collaboration

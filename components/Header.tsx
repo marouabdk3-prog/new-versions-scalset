@@ -22,21 +22,22 @@ export default function Header() {
     const logoScale = useTransform(scrollY, [0, 80, 160], [1, 1.08, 1]);
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pt-3 sm:pt-4">
+        <div className="fixed top-0 left-0 right-0 z-110 px-4 sm:px-6 pt-2 sm:pt-3">
 
             {/* ── FLOATING NAVBAR ── */}
             <motion.header
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                className="group relative w-full flex items-center justify-between px-4 md:px-6 py-1.5 rounded-xl overflow-hidden"
+                className="group relative w-full flex items-center justify-between px-4 md:px-6 py-1 rounded-xl overflow-hidden"
                 style={{
-                    background: "rgba(0, 0, 0, 0)",
-                    backdropFilter: "none",
-                    WebkitBackdropFilter: "none",
-                    border: "1px solid rgba(255,255,255,0)",
-                    boxShadow: "none",
+                    background: "rgba(4, 4, 8, 0.55)",
+                    backdropFilter: "blur(18px) saturate(160%)",
+                    WebkitBackdropFilter: "blur(18px) saturate(160%)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)",
                     transition: "background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease",
+                    isolation: "isolate",
                 }}
             >
                 {/* Bottom luminous ribbon — appears on navbar hover */}
@@ -71,7 +72,7 @@ export default function Header() {
                 >
                     <Link
                         href="/"
-                        className="focus:outline-none relative block w-32 md:w-44 lg:w-[21.8rem] h-15 md:h-20"
+                        className="focus:outline-none relative block w-28 md:w-40 lg:w-72 h-11 md:h-14"
                     >
                         <Image
                             src="/SCALSET-1.ico"

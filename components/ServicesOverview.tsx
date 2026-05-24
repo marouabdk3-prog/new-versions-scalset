@@ -94,9 +94,7 @@ export default function ServicesOverview() {
                         </div>
 
                         <motion.a
-                            href="https://wa.me/336XXXXXXXX" // À remplacer par le numéro réel
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href="/contact"
                             whileHover={{ scale: 1.03 }}
                             whileTap={{ scale: 0.97 }}
                             className="btn-shiny px-10 py-5 text-base rounded-2xl flex items-center gap-3 w-full md:w-auto justify-center max-[480px]:py-3 max-[480px]:px-6 max-[480px]:text-sm"

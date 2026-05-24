@@ -5,7 +5,7 @@ import { MapPin, Phone, Mail, MessageSquare, Send } from "lucide-react";
 import type { FormEvent } from "react";
 import { useState } from "react";
 
-const WHATSAPP_NUMBER = "213794204344"; // À remplacer par le numéro réel de l'entreprise
+const WHATSAPP_NUMBER = "971541771844"; // À remplacer par le numéro réel de l'entreprise
 
 const CATEGORIES = [
     { label: "Besoin de renfort", defaultText: "Bonjour, j'aimerais avoir plus d'informations sur vos services pour renforcer mon équipe." },
@@ -172,7 +172,7 @@ export default function ContactPage() {
                         </div>
 
                         {/* Google Maps Embed */}
-                        <div className="glass-panel w-full h-[350px] rounded-[2rem] overflow-hidden relative shrink-0">
+                        <div className="glass-panel w-full h-[220px] sm:h-[280px] md:h-[350px] rounded-[2rem] overflow-hidden relative shrink-0">
                             {/* Grayscale/Invert filter to match dark aesthetics perfectly */}
                             <iframe
                                 title="Localisation Dubaï"

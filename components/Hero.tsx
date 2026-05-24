@@ -14,7 +14,7 @@ export default function Hero() {
 
     const [isMobile, setIsMobile] = useState(false);
     const [offsets, setOffsets] = useState({ text: 230, logo: -30, sec2Text: -50 });
-    const [sandLogoSize, setSandLogoSize] = useState(648);
+    const [sandLogoSize, setSandLogoSize] = useState(480);
 
     useEffect(() => {
         const updateLayout = () => {
@@ -68,25 +68,59 @@ export default function Hero() {
             {/* HERO */}
             <section className="relative overflow-hidden bg-transparent" style={{ height: '100dvh', minHeight: 500 }}>
 
-                {/* PARTICLE TEXT (SAND) */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{
-                        duration: 1.5,
-                        ease: "easeOut",
-                        delay: 0.2,
-                    }}
-                    className="absolute inset-0"
-                >
-                    <ParticleText
-                        lines={["SCALSET"]}
-                        ariaLabel="Scalset"
-                        className="text-[clamp(1.8rem,10vw,5.2rem)] font-bold tracking-[0.2em] md:tracking-[0.75em] uppercase font-(family-name:--font-syncopate)"
-                        yOffset={offsets.text}
-                        explode={shouldExplode}
-                    />
-                </motion.div>
+                {/* PARTICLE TEXT (SAND) — fond en sortant quand le logo sable part */}
+                {!sandExited && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: exitLeft ? 0 : 1 }}
+                        transition={exitLeft
+                            ? { duration: 0.5, ease: "easeIn" }
+                            : { duration: 1.5, ease: "easeOut", delay: 0.2 }
+                        }
+                        className="absolute inset-0"
+                    >
+                        <ParticleText
+                            lines={["SCALSET"]}
+                            ariaLabel="Scalset"
+                            className="text-[clamp(1.8rem,10vw,5.2rem)] font-bold tracking-[0.2em] md:tracking-[0.75em] uppercase font-(family-name:--font-syncopate)"
+                            yOffset={offsets.text}
+                            explode={shouldExplode}
+                        />
+                    </motion.div>
+                )}
+
+                {/* SCALSET texte statique — même couleur que 100.svg, apparaît avec le logo */}
+                {sandExited && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        style={{
+                            position: "absolute",
+                            inset: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            pointerEvents: "none",
+                            transform: `translateY(${offsets.text}px)`,
+                        }}
+                    >
+                        {/* wrapper drop-shadow = arêtes champagne, comme stroke du SVG */}
+                        <div className="animate-metalGlow" style={{
+                            filter: "drop-shadow(0 0 0.4px rgba(214,179,106,0.65)) drop-shadow(0 0 1px rgba(214,179,106,0.25))",
+                        }}>
+                            <span className="metal-shine-text" style={{
+                                fontFamily: "var(--font-syncopate)",
+                                fontSize: "clamp(1.8rem, 10vw, 5.2rem)",
+                                fontWeight: 700,
+                                letterSpacing: "0.25em",
+                                textTransform: "uppercase",
+                            }}>
+                                SCALSET
+                            </span>
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* PARTICLE LOGO (sable) */}
                 {!sandExited && (
@@ -107,7 +141,7 @@ export default function Hero() {
                     </motion.div>
                 )}
 
-                {/* OVERLAY — déclenche la sortie gauche au survol/touch */}
+                {/* OVERLAY — déclenche la sortie gauche au clic/tap sur le logo ou l'écriture */}
                 {!exitLeft && !sandExited && (
                     <div
                         className="absolute inset-0 z-20 cursor-pointer"
@@ -116,7 +150,7 @@ export default function Hero() {
                     />
                 )}
 
-                {/* LOGO 77.png — apparaît fixe après la sortie du sable */}
+                {/* LOGO 100.svg — apparaît fixe après la sortie du sable */}
                 {sandExited && (
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -130,9 +164,9 @@ export default function Hero() {
                             height: sandLogoSize,
                             top: "50%",
                             left: "50%",
-                            transform: `translate(-50%, calc(-50% + ${offsets.logo}px + 75px))`,
+                            transform: `translate(-50%, calc(-50% + ${offsets.logo}px + 20px))`,
                         }}>
-                            <Image src="/77.png" alt="Scalset Logo" fill draggable={false} style={{ objectFit: "contain" }} />
+                            <Image src="/100.svg" alt="Scalset Logo" fill draggable={false} className="animate-metalGlow" style={{ objectFit: "contain" }} />
                         </div>
                     </motion.div>
                 )}
@@ -209,11 +243,10 @@ export default function Hero() {
                     {/* Volumetric Golden Light behind text */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] w-full max-w-4xl h-75 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.35)_0%,transparent_60%)] blur-[30px] pointer-events-none" />
 
-                    <h3 
-                        className="relative z-10 max-w-3xl text-[0.85rem] sm:text-[1.05rem] md:text-[1.5rem] lg:text-[2.1rem] font-bold leading-[1.4] tracking-wide px-2"
+                    <h3
+                        className="relative z-10 max-w-3xl text-[0.85rem] sm:text-[1.05rem] md:text-[1.5rem] lg:text-[2.1rem] font-bold leading-[1.4] tracking-wide px-2 metal-shine-text"
                         style={{
-                            color: "#d8d8d8",
-                            filter: "drop-shadow(0px 1px 1px rgba(255,255,255,0.5)) drop-shadow(0px 4px 3px rgba(0,0,0,0.8)) drop-shadow(0px 8px 15px rgba(0,0,0,0.9))"
+                            filter: "drop-shadow(0px 1px 1px rgba(255,255,255,0.3)) drop-shadow(0px 4px 3px rgba(0,0,0,0.8)) drop-shadow(0px 8px 15px rgba(0,0,0,0.9))"
                         }}
                     >
                         Nous recrutons, formons et supervisons<br/>
@@ -221,7 +254,7 @@ export default function Hero() {
                         restant pilotée par vous.
                     </h3>
 
-                    <SandButton href="#contact">
+                    <SandButton href="/contact">
                         Nous Contacter
                     </SandButton>
                 </motion.div>

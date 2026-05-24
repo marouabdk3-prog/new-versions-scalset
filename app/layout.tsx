@@ -23,6 +23,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LogoAnimationProvider } from "@/components/LogoAnimationContext";
 import SandBackground from "@/components/SandBackground";
+import MercuryIntro from "@/components/MercuryIntro";
 
 export default function RootLayout({
   children,
@@ -32,9 +33,11 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark max-[480px]:overflow-x-hidden">
       <body className={`${spaceGrotesk.variable} ${syncopate.variable} antialiased text-[#F8FAFC] relative min-h-screen overflow-x-hidden`}>
+        {/* Intro overlay sits above everything; real site is behind it */}
+        <MercuryIntro />
         <SandBackground />
         <LogoAnimationProvider>
-          <div className="relative z-10 max-[480px]:overflow-x-hidden max-[480px]:w-full">
+          <div id="main-site" className="relative z-10 max-[480px]:overflow-x-hidden max-[480px]:w-full">
             <Header />
             {children}
             <Footer />

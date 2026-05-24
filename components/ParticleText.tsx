@@ -140,23 +140,23 @@ export default function ParticleText({ lines, ariaLabel, className, yOffset = 0,
         sampleContext.textBaseline = "middle";
         sampleContext.fillStyle = "#ffffff";
 
-        const maxWidth = width * 0.95; // Match HTML wrapping logic
-        const words = lines.join(" ").split(" ");
+        const maxWidth = width * 0.95;
         const wrappedLines: string[] = [];
-        let currentLine = words[0];
 
-        for (let i = 1; i < words.length; i++) {
-            const word = words[i];
-            const testLine = currentLine + " " + word;
-            const testWidth = sampleContext.measureText(testLine).width;
-            if (testWidth < maxWidth) {
-                currentLine = testLine;
-            } else {
-                wrappedLines.push(currentLine);
-                currentLine = word;
+        for (const line of lines) {
+            const words = line.split(" ");
+            let currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                const testLine = currentLine + " " + words[i];
+                if (sampleContext.measureText(testLine).width < maxWidth) {
+                    currentLine = testLine;
+                } else {
+                    wrappedLines.push(currentLine);
+                    currentLine = words[i];
+                }
             }
+            wrappedLines.push(currentLine);
         }
-        wrappedLines.push(currentLine);
 
         const firstLineY = textOffsetY + textRect.height / 2 - ((wrappedLines.length - 1) * lineHeight) / 2 + yOffset;
 

@@ -56,7 +56,7 @@ function MissionCard() {
                         Notre Mission
                     </span>
 
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] tracking-tight">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] tracking-tight">
                         L&apos;ambition<br />qui nous{" "}
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 to-slate-500 italic pr-1">
                             définit.
@@ -179,7 +179,7 @@ function ElevatedConclusion() {
                     </span>
                 </h2>
                 <motion.a
-                    href="#contact"
+                    href="/contact"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="btn-shiny px-10 py-5 text-lg rounded-2xl"
