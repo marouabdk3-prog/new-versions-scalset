@@ -5,15 +5,15 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import gsap from "gsap";
 
-// Centre exact de l'écran du laptop dans zz.png
-const ZOOM_CX = 52;
-const ZOOM_CY = 77;
+// Centre du visage du monsieur dans 202.png
+const ZOOM_CX = 50;
+const ZOOM_CY = 43;
 
-// Zone nette = laptop exact (outline bleue dans le screenshot)
-const SCR_X  = 33;   // bord gauche du laptop
-const SCR_Y  = 40;   // bord haut de l'écran (descendu avec le zoom)
-const SCR_W  = 37;   // largeur du laptop
-const SCR_H  = 40;   // hauteur écran + clavier
+// Zone nette centrée sur le visage
+const SCR_X  = 35;   // bord gauche de la zone nette
+const SCR_Y  = 26;   // bord haut de la zone nette
+const SCR_W  = 30;   // largeur
+const SCR_H  = 34;   // hauteur
 const SCR_RX = 4;
 
 export default function MercuryIntro() {
@@ -23,9 +23,10 @@ export default function MercuryIntro() {
   const doneRef         = useRef(false);
   const progressRef     = useRef(0);
 
-  const imgWrapRef  = useRef<HTMLDivElement>(null);  // zoom + fade
-  const blurLayerRef = useRef<HTMLDivElement>(null); // blur edges only
-  const hintRef     = useRef<HTMLDivElement>(null);
+  const imgWrapRef    = useRef<HTMLDivElement>(null);
+  const blurLayerRef  = useRef<HTMLDivElement>(null);
+  const smokeRef      = useRef<HTMLDivElement>(null);
+  const hintRef       = useRef<HTMLDivElement>(null);
   const portalFiredRef = useRef(false);
 
   useEffect(() => {
@@ -62,13 +63,18 @@ export default function MercuryIntro() {
         overwrite: true,
       });
 
-      // ── Depth-of-field : blur progressif sur les bords, centre toujours net ──
-      // Commence à 10% de scroll, atteint 14px à 65%
+      // ── Noir progressif autour du visage dès le premier scroll ──
       if (blurLayerRef.current) {
-        const blurP  = Math.min(1, Math.max(0, (progressRef.current - 0.10) / 0.55));
-        const blurPx = (blurP * 32).toFixed(1);
-        blurLayerRef.current.style.filter = `blur(${blurPx}px)`;
+        const p = progressRef.current;
+        blurLayerRef.current.style.opacity = Math.min(1, p * 1.6).toFixed(3);
       }
+
+      // ── Fumée noire progressive dès le début du zoom ──
+      if (smokeRef.current) {
+        const smokeOpacity = Math.min(1, progressRef.current * 1.2).toFixed(3);
+        smokeRef.current.style.opacity = smokeOpacity;
+      }
+
 
       // ── Fire portal-entry at 65% so background de-zoom starts as overlay fades ──
       if (progressRef.current >= 0.65 && !portalFiredRef.current) {
@@ -153,7 +159,7 @@ export default function MercuryIntro() {
       >
         {/* Layer 1 : image nette — toujours sharp, jamais de blur */}
         <Image
-          src="/zz.png"
+          src="/202.png"
           alt=""
           fill
           priority
@@ -170,9 +176,8 @@ export default function MercuryIntro() {
           ref={blurLayerRef}
           style={{
             position: "absolute", inset: 0,
-            backgroundImage: "url(/zz.png)",
-            backgroundSize: "cover",
-            backgroundPosition: "center center",
+            background: "black",
+            opacity: 0,
             filter: "blur(0px)",
             WebkitMaskImage: mask,
             maskImage: mask,
@@ -183,60 +188,24 @@ export default function MercuryIntro() {
           }}
         />
 
-        {/* Vignette cinématique */}
-        <div style={{
+        {/* Fumée noire autour du visage — s'intensifie avec le zoom */}
+        <div ref={smokeRef} style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: `radial-gradient(ellipse at ${ZOOM_CX}% ${ZOOM_CY}%, transparent 18%, rgba(0,0,0,0.38) 52%, rgba(0,0,0,0.82) 100%)`,
+          background: "rgba(0,0,0,0.78)",
+          opacity: 0,
+          WebkitMaskImage: mask,
+          maskImage: mask,
+          WebkitMaskSize: "100% 100%",
+          maskSize: "100% 100%",
+          maskMode: "luminance",
         }} />
 
-        {/* ── Coffee steam — vapeur cinématique au-dessus de la tasse ── */}
+        {/* Vignette cinématique — zone centrale large pour ne pas toucher le visage */}
         <div style={{
-          position: "absolute",
-          left: "73%",
-          top: "64%",
-          width: 40,
-          transform: "translateX(-50%)",
-          pointerEvents: "none",
-        }}>
-          {/* Wisp 1 — central */}
-          <div style={{
-            position: "absolute", bottom: 0, left: "30%",
-            width: 14, height: 70,
-            background: "rgba(255,255,255,0.9)",
-            borderRadius: "50%",
-            filter: "blur(12px)",
-            mixBlendMode: "screen",
-            opacity: 0.18,
-            animation: "steamFloat 6s ease-in-out infinite",
-            transformOrigin: "bottom center",
-          }} />
-          {/* Wisp 2 — droite */}
-          <div style={{
-            position: "absolute", bottom: 0, left: "55%",
-            width: 12, height: 60,
-            background: "rgba(255,255,255,0.9)",
-            borderRadius: "50%",
-            filter: "blur(12px)",
-            mixBlendMode: "screen",
-            opacity: 0.18,
-            animation: "steamFloatB 6s ease-in-out infinite",
-            animationDelay: "2s",
-            transformOrigin: "bottom center",
-          }} />
-          {/* Wisp 3 — gauche */}
-          <div style={{
-            position: "absolute", bottom: 0, left: "8%",
-            width: 12, height: 65,
-            background: "rgba(255,255,255,0.9)",
-            borderRadius: "50%",
-            filter: "blur(12px)",
-            mixBlendMode: "screen",
-            opacity: 0.18,
-            animation: "steamFloatC 6s ease-in-out infinite",
-            animationDelay: "1s",
-            transformOrigin: "bottom center",
-          }} />
-        </div>
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: `radial-gradient(ellipse at ${ZOOM_CX}% ${ZOOM_CY}%, transparent 32%, rgba(0,0,0,0.60) 58%, rgba(0,0,0,0.95) 100%)`,
+        }} />
+
       </div>
 
       {/* Scroll hint */}

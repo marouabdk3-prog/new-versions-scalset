@@ -64,6 +64,7 @@
   <!-- ── Layer 1 : depth shadow (dark offset) ── -->
   <path
     fill="#0f1114"
+    fill-rule="evenodd"
     opacity="0.55"
     transform="translate(0.4, 0.7)"
     d="M33.07,51.25L9.62,89.35L50,10.65l40.38,78.7L50,25.41L33.07,51.25z
@@ -78,6 +79,7 @@
   <!-- ── Layer 2 : silver metallic base fill ── -->
   <path
     fill="url(#silverMetal)"
+    fill-rule="evenodd"
     d="M33.07,51.25L9.62,89.35L50,10.65l40.38,78.7L50,25.41L33.07,51.25z
        M46.35,50.43L50,46.57l40.38,42.78L66.36,56.63L50,33.99L33.64,56.63
        L9.62,89.35l31.54-33.42l22.04,17.05c0.69,0.54,1.42,1.03,2.17,1.48
@@ -90,6 +92,7 @@
   <!-- ── Layer 3 : brushed metal texture overlay ── -->
   <path
     fill="url(#silverMetal)"
+    fill-rule="evenodd"
     filter="url(#brushed)"
     opacity="0.35"
     d="M33.07,51.25L9.62,89.35L50,10.65l40.38,78.7L50,25.41L33.07,51.25z
@@ -120,6 +123,7 @@
   <!-- ── Layer 5 : top specular gloss streak ── -->
   <path
     fill="url(#specular)"
+    fill-rule="evenodd"
     d="M33.07,51.25L9.62,89.35L50,10.65l40.38,78.7L50,25.41L33.07,51.25z
        M46.35,50.43L50,46.57l40.38,42.78L66.36,56.63L50,33.99L33.64,56.63
        L9.62,89.35l31.54-33.42l22.04,17.05c0.69,0.54,1.42,1.03,2.17,1.48

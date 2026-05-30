@@ -201,7 +201,7 @@ export default function SandBackground() {
                             playsInline
                             style={{ ...videoStyle, opacity: 1 }}
                         >
-                            <source src="/videos/mp_ (5).mp4" type="video/mp4" />
+                            <source src="/videos/new.mp4" type="video/mp4" />
                         </video>
 
                         {/* Video 2A — instance active, boucle duale sans seek */}

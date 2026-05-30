@@ -154,7 +154,7 @@ function ElevatedConclusion() {
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className="relative mt-20 h-[40vh] flex flex-col items-center justify-center text-center px-4 rounded-[3rem] border-2 border-slate-200/30 shadow-[0_0_40px_rgba(226,232,240,0.08)] overflow-hidden group"
+            className="relative mt-12 sm:mt-20 min-h-[40vh] flex flex-col items-center justify-center text-center px-4 rounded-4xl sm:rounded-[3rem] border-2 border-slate-200/30 shadow-[0_0_40px_rgba(226,232,240,0.08)] overflow-hidden group"
         >
             <div className="absolute inset-0 bg-[#0d0d14]" />
 
@@ -172,7 +172,7 @@ function ElevatedConclusion() {
             />
 
             <div className="relative z-10 flex flex-col items-center gap-10">
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.1]">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.1]">
                     Arrêtez de payer trop cher<br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-slate-100 to-slate-400 italic pr-2">
                         pour exécuter
@@ -230,10 +230,10 @@ export default function APropos() {
                                 </div>
                             </div>
                         </div>
-                        <h1 className="text-6xl md:text-8xl lg:text-[8.5rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#F8FAFC] via-[#E2E8F0] to-[#64748B] leading-[0.9] pb-4 drop-shadow-2xl">
+                        <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[8.5rem] font-black tracking-tighter text-transparent bg-clip-text bg-linear-to-b from-[#F8FAFC] via-[#E2E8F0] to-[#64748B] leading-[0.9] pb-4 drop-shadow-2xl">
                             L&apos;Exécution<br />Comme Art.
                         </h1>
-                        <p className="text-[#d8d8d8] text-lg md:text-xl lg:text-2xl max-w-3xl font-bold leading-relaxed">
+                        <p className="text-[#d8d8d8] text-base sm:text-lg md:text-xl lg:text-2xl max-w-3xl font-bold leading-relaxed">
                             Notre expertise en outsourcing nous permet de fournir à des structures la possibilité d’être parmi
                             les plus compétitives et les plus efficaces sur le marché mondial.
                         </p>

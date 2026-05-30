@@ -31,7 +31,7 @@ export default function ContactPage() {
     };
 
     return (
-        <main className="min-h-screen pt-40 pb-32 relative flex flex-col items-center">
+        <main className="min-h-screen pt-24 sm:pt-32 md:pt-40 pb-20 md:pb-32 relative flex flex-col items-center">
             <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 w-full">
                 {/* Header Section */}
                 <motion.div
@@ -55,7 +55,7 @@ export default function ContactPage() {
                         initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="glass-panel rounded-[2.5rem] p-10 md:p-14 relative overflow-hidden w-full flex flex-col"
+                        className="glass-panel rounded-4xl sm:rounded-[2.5rem] p-6 sm:p-10 md:p-14 relative overflow-hidden w-full flex flex-col"
                     >
                         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-500/10 rounded-bl-full blur-2xl pointer-events-none" />
 
@@ -64,7 +64,7 @@ export default function ContactPage() {
                             Contact Rapide (WhatsApp)
                         </h2>
 
-                        <form onSubmit={handleWhatsAppSubmit} className="flex flex-col gap-14 relative z-10">
+                        <form onSubmit={handleWhatsAppSubmit} className="flex flex-col gap-8 sm:gap-14 relative z-10">
                             {/* Nom */}
                             <div className="flex flex-col gap-3">
                                 <label className="text-sm font-semibold text-slate-300">Votre Nom Complet</label>

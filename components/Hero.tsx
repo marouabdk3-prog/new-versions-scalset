@@ -10,11 +10,11 @@ import SandButton from "./SandButton";
 export default function Hero() {
     const [shouldExplode, setShouldExplode] = useState(false);
     const [exitLeft, setExitLeft] = useState(false);
-    const [sandExited, setSandExited] = useState(false);
+    const [sandExited, setSandExited] = useState(true);
 
     const [isMobile, setIsMobile] = useState(false);
     const [offsets, setOffsets] = useState({ text: 230, logo: -30, sec2Text: -50 });
-    const [sandLogoSize, setSandLogoSize] = useState(480);
+    const [sandLogoSize, setSandLogoSize] = useState(280);
 
     useEffect(() => {
         const updateLayout = () => {
@@ -23,26 +23,24 @@ export default function Hero() {
             setIsMobile(w < 768);
 
             const isPortraitMobile = w < 768 && h > w;
-            const isLandscapeMobile = h < 500;
             const aspect = w / h;
             const isSquareish = aspect < 1.1;
 
             if (w > 1024 && !isSquareish) {
-                setOffsets({ text: Math.round(h * 0.33 + 5), logo: -Math.round(h * 0.09), sec2Text: -50 });
+                setOffsets({ text: Math.round(h * 0.30), logo: -Math.round(h * 0.18), sec2Text: -150 });
             } else if (w >= 768 || (w > 1024 && isSquareish)) {
-                setOffsets({ text: h * 0.30, logo: -h * 0.12, sec2Text: -50 });
+                setOffsets({ text: h * 0.28, logo: -h * 0.20, sec2Text: -120 });
             } else if (isPortraitMobile) {
-                setOffsets({ text: h * 0.22, logo: -h * 0.09, sec2Text: -h * 0.12 });
+                setOffsets({ text: h * 0.20, logo: -h * 0.14, sec2Text: -h * 0.28 });
             } else {
-                // Landscape mobile — keep text/logo closer together, less vertical shift
-                setOffsets({ text: h * 0.22, logo: -h * 0.16, sec2Text: -h * 0.15 });
+                setOffsets({ text: h * 0.18, logo: -h * 0.20, sec2Text: -h * 0.25 });
             }
 
-            // Même formule que ParticleLogo pour la taille exacte du logo sable
-            let mobileScale = 0.72;
+            const isLandscapeMobile = h < 500;
+            let mobileScale = 0.58;
             if (w <= 1024 || isSquareish) {
-                const baseScale = isPortraitMobile ? 0.55 : (isLandscapeMobile ? 0.42 : 0.60);
-                mobileScale = Math.min(baseScale, aspect * 0.85);
+                const baseScale = isPortraitMobile ? 0.46 : (isLandscapeMobile ? 0.34 : 0.50);
+                mobileScale = Math.min(baseScale, aspect * 0.70);
             }
             setSandLogoSize(Math.min(w, h) * mobileScale);
         };
@@ -106,18 +104,60 @@ export default function Hero() {
                         }}
                     >
                         {/* wrapper drop-shadow = arêtes champagne, comme stroke du SVG */}
-                        <div className="animate-metalGlow" style={{
-                            filter: "drop-shadow(0 0 0.4px rgba(214,179,106,0.65)) drop-shadow(0 0 1px rgba(214,179,106,0.25))",
-                        }}>
-                            <span className="metal-shine-text" style={{
-                                fontFamily: "var(--font-syncopate)",
-                                fontSize: "clamp(1.8rem, 10vw, 5.2rem)",
-                                fontWeight: 700,
-                                letterSpacing: "0.25em",
-                                textTransform: "uppercase",
+                        <div className="flex flex-col items-center gap-20">
+                            <div className="animate-metalGlow" style={{
+                                filter: "drop-shadow(0 0 0.4px rgba(214,179,106,0.65)) drop-shadow(0 0 1px rgba(214,179,106,0.25))",
                             }}>
-                                SCALSET
-                            </span>
+                                <span className="metal-shine-text" style={{
+                                    fontFamily: "var(--font-syncopate)",
+                                    fontSize: "clamp(1.4rem, 7.5vw, 4.2rem)",
+                                    fontWeight: 700,
+                                    letterSpacing: "0.25em",
+                                    textTransform: "uppercase",
+                                    whiteSpace: "nowrap",
+                                }}>
+                                    SCALSET
+                                </span>
+                            </div>
+                            <div className="animate-metalGlow" style={{
+                                filter: "drop-shadow(0 0 0.4px rgba(214,179,106,0.4)) drop-shadow(0 0 1px rgba(214,179,106,0.15))",
+                            }}>
+                                <span className="metal-shine-text" style={{
+                                    fontFamily: "var(--font-syncopate)",
+                                    fontSize: "clamp(0.55rem, 2.2vw, 1.45rem)",
+                                    fontWeight: 600,
+                                    letterSpacing: "0.18em",
+                                    textTransform: "uppercase",
+                                    textAlign: "center",
+                                    display: "block",
+                                    lineHeight: 1.6,
+                                    padding: "0 1rem",
+                                }}>
+                                    Pendant que vous dirigez la vision,<br />
+                                    Scalset exécute le reste.
+                                </span>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* LOGO métallique 100.svg */}
+                {sandExited && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="absolute inset-0 pointer-events-none select-none"
+                    >
+                        <div style={{
+                            position: "absolute",
+                            width: sandLogoSize,
+                            height: sandLogoSize,
+                            top: "50%",
+                            left: "50%",
+                            transform: `translate(-50%, calc(-50% + ${offsets.logo}px + 20px))`,
+                        }}>
+                            <Image src="/100.svg" alt="Scalset Logo" fill draggable={false} className="animate-metalGlow" style={{ objectFit: "contain" }} />
                         </div>
                     </motion.div>
                 )}
@@ -151,25 +191,6 @@ export default function Hero() {
                 )}
 
                 {/* LOGO 100.svg — apparaît fixe après la sortie du sable */}
-                {sandExited && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="absolute inset-0 pointer-events-none select-none"
-                    >
-                        <div style={{
-                            position: "absolute",
-                            width: sandLogoSize,
-                            height: sandLogoSize,
-                            top: "50%",
-                            left: "50%",
-                            transform: `translate(-50%, calc(-50% + ${offsets.logo}px + 20px))`,
-                        }}>
-                            <Image src="/100.svg" alt="Scalset Logo" fill draggable={false} className="animate-metalGlow" style={{ objectFit: "contain" }} />
-                        </div>
-                    </motion.div>
-                )}
 
 
 
@@ -184,7 +205,7 @@ export default function Hero() {
                         delay: 2,
                         duration: 1,
                     }}
-                    className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 md:gap-3"
+                    className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] left-8 flex flex-col items-center gap-2 md:gap-3"
                 >
                     <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-medium">
                         Scroll

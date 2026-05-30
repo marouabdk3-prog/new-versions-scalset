@@ -83,7 +83,7 @@ const fadeUp = {
 
 export default function Services() {
     return (
-        <main className="min-h-screen pt-32 pb-32 relative overflow-hidden">
+        <main className="min-h-screen pt-24 sm:pt-32 pb-20 sm:pb-32 relative overflow-hidden">
 
             {/* Animated Ambient Background Glows */}
             <motion.div
