@@ -141,7 +141,7 @@ export default function Services() {
 
                 {/* ── 2. PROFILES GRID ── */}
                 <section className="flex flex-col gap-12 border-t border-white/5 pt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                         {profiles.map((profile, i) => {
                             const Icon = profile.icon;
                             if (profile.image) {
@@ -156,7 +156,7 @@ export default function Services() {
                                             initial="hidden"
                                             whileInView="show"
                                             viewport={{ once: true, margin: "-40px" }}
-                                            className="group flex flex-col rounded-[1.25rem] bg-[#0d0d14] overflow-hidden transition-all duration-500 h-72 relative"
+                                            className="group flex flex-col rounded-[1.25rem] bg-[#0d0d14] overflow-hidden transition-all duration-500 h-60 sm:h-72 relative"
                                         >
                                             <div className="relative flex-1 w-full overflow-hidden">
                                                 <Image
@@ -269,7 +269,7 @@ export default function Services() {
                                     </div>
 
                                     {/* Content Card */}
-                                    <div className="flex-1 glass-panel p-6 lg:p-7 rounded-2xl transition-all duration-300 flex flex-col gap-3 text-left lg:text-center w-full">
+                                    <div className="flex-1 glass-panel p-4 sm:p-6 lg:p-7 rounded-2xl transition-all duration-300 flex flex-col gap-3 text-left lg:text-center w-full">
                                         <h3 className="text-xl font-bold text-slate-100 tracking-tight">{step.title}</h3>
                                         <p className="text-sm md:text-base text-slate-400/90 leading-relaxed">
                                             {step.description}

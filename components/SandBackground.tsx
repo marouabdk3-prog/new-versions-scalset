@@ -3,26 +3,37 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
+// ── Position du visage dans 17.mp4 (ajuster si besoin) ──
+const FACE_X = 50;   // % horizontal (50 = centré)
+const FACE_Y = 32;   // % vertical   (32 = upper-third, zone visage)
+
+// ── Masque SVG : trou centré sur le visage ──
+const MASK_X = FACE_X - 11;   // bord gauche
+const MASK_Y = FACE_Y - 13;   // bord haut
+const MASK_W = 22;             // largeur
+const MASK_H = 26;             // hauteur
+const MASK_R = 7;              // arrondi
+
 export default function SandBackground() {
     const pathname = usePathname();
     const isHome = pathname === "/";
 
-    const wrapRef          = useRef<HTMLDivElement>(null);
-    const zoomRef          = useRef<HTMLDivElement>(null);
-    const smokeOverlayRef  = useRef<HTMLDivElement>(null);
-    const blackOverlayRef  = useRef<HTMLDivElement>(null);
-    const introVigRef      = useRef<HTMLDivElement>(null);  // vignette radiale fond
-    const introSmokeRef    = useRef<HTMLDivElement>(null);  // fumée noire masquée SVG
-    const hintRef          = useRef<HTMLDivElement>(null);  // "scroll to enter"
-    const v1Ref            = useRef<HTMLVideoElement>(null);
-    const v2Ref            = useRef<HTMLVideoElement>(null);
+    const wrapRef         = useRef<HTMLDivElement>(null);
+    const zoomRef         = useRef<HTMLDivElement>(null);
+    const smokeOverlayRef = useRef<HTMLDivElement>(null);
+    const blackOverlayRef = useRef<HTMLDivElement>(null);
+    const introVigRef     = useRef<HTMLDivElement>(null);
+    const introSmokeRef   = useRef<HTMLDivElement>(null);
+    const hintRef         = useRef<HTMLDivElement>(null);
+    const v1Ref           = useRef<HTMLVideoElement>(null); // 17.mp4
+    const v2Ref           = useRef<HTMLVideoElement>(null); // 18.mp4 loop
 
     const switchedRef      = useRef(false);
     const introDoneRef     = useRef(false);
     const introProgressRef = useRef(0);
     const portalFiredRef   = useRef(false);
 
-    // ── Preload v2 silently ──
+    // ── Preload 18.mp4 silently ──
     useEffect(() => {
         const v2 = v2Ref.current;
         if (!v2) return;
@@ -30,7 +41,7 @@ export default function SandBackground() {
         v2.currentTime = 0;
     }, []);
 
-    // ── v1 → v2 : transition noire ──
+    // ── 17.mp4 → 18.mp4 : transition noire ──
     useEffect(() => {
         const v1      = v1Ref.current;
         const v2      = v2Ref.current;
@@ -76,52 +87,43 @@ export default function SandBackground() {
         document.body.classList.add("intro-no-events");
 
         const apply = (p: number) => {
-            // Zoom progressif sur le sujet
             const scale = 1 + p * 0.85;
             zoom.style.transition = "transform 0.45s cubic-bezier(0.16,1,0.3,1)";
             zoom.style.transform  = `scale(${scale.toFixed(4)})`;
 
-            // Zone transparente qui rétrécit vers le visage
-            const clearW = Math.max(10, 52 - p * 44);   // 52% → 8%
-            const clearH = Math.max(14, 68 - p * 56);   // 68% → 12%
+            const clearW = Math.max(10, 52 - p * 44);
+            const clearH = Math.max(14, 68 - p * 56);
             const dark1  = (p * 0.72).toFixed(2);
             const dark2  = Math.min(1, p * 1.05).toFixed(2);
             if (introVigRef.current) {
                 introVigRef.current.style.background =
-                    `radial-gradient(ellipse ${clearW.toFixed(1)}% ${clearH.toFixed(1)}% at 50% 40%, ` +
+                    `radial-gradient(ellipse ${clearW.toFixed(1)}% ${clearH.toFixed(1)}% at ${FACE_X}% ${FACE_Y}%, ` +
                     `transparent 60%, rgba(0,0,0,${dark1}) 78%, rgba(0,0,0,${dark2}) 100%)`;
                 introVigRef.current.style.opacity = Math.min(1, p * 1.1).toFixed(3);
             }
-            // Fumée noire avec blur SVG — s'intensifie autour du visage
             if (introSmokeRef.current) {
                 introSmokeRef.current.style.opacity = Math.min(1, p * 1.3).toFixed(3);
             }
-
-            // Hint disparaît dès 1er scroll
             if (hintRef.current) {
                 hintRef.current.style.opacity = String(Math.max(0, 1 - p * 14));
             }
 
-            // À 65% : démarre la vidéo
-            if (p >= 0.65 && !portalFiredRef.current) {
+            if (p >= 1 && !portalFiredRef.current) {
                 portalFiredRef.current = true;
                 v1.play().catch(() => {});
             }
 
-            // Révèle le site à 40%
             if (p >= 0.40) {
                 document.body.classList.remove("intro-active");
             } else {
                 document.body.classList.add("intro-active");
             }
 
-            // Fin intro
             if (p >= 1 && !introDoneRef.current) {
                 introDoneRef.current = true;
                 document.body.style.overflow = "";
                 document.body.classList.remove("intro-no-events");
                 window.dispatchEvent(new CustomEvent("intro-complete"));
-                // Fade out vignette + fumée intro
                 if (introVigRef.current) {
                     introVigRef.current.style.transition = "opacity 0.9s ease";
                     introVigRef.current.style.opacity    = "0";
@@ -130,10 +132,8 @@ export default function SandBackground() {
                     introSmokeRef.current.style.transition = "opacity 0.9s ease";
                     introSmokeRef.current.style.opacity    = "0";
                 }
-                // Règle le zoom à 1.05 (position normale)
                 zoom.style.transition = "transform 1.4s cubic-bezier(0.16,1,0.3,1)";
                 zoom.style.transform  = "scale(1.05)";
-                // Cache le hint
                 if (hintRef.current) hintRef.current.style.display = "none";
             }
         };
@@ -144,10 +144,15 @@ export default function SandBackground() {
             apply(introProgressRef.current);
         };
 
-        const onWheel = (e: WheelEvent) => { e.preventDefault(); advance(e.deltaY); };
+        const onWheel = (e: WheelEvent) => {
+            if (introDoneRef.current) return;
+            e.preventDefault();
+            advance(e.deltaY);
+        };
         let ty = 0;
         const onTouchStart = (e: TouchEvent) => { ty = e.touches[0].clientY; };
         const onTouchMove  = (e: TouchEvent) => {
+            if (introDoneRef.current) return;
             e.preventDefault();
             const d = ty - e.touches[0].clientY;
             ty = e.touches[0].clientY;
@@ -182,7 +187,7 @@ export default function SandBackground() {
         return () => clearTimeout(t);
     }, [isHome]);
 
-    // ── Force smoke/blur sur pages internes ──
+    // ── Force smoke/blur pages internes ──
     useEffect(() => {
         if (!isHome) {
             if (wrapRef.current)         wrapRef.current.style.filter         = "blur(10px)";
@@ -224,6 +229,16 @@ export default function SandBackground() {
         objectFit: "cover", objectPosition: "center center",
     };
 
+    const svgMask = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">` +
+        `<defs><filter id="f" x="-50%" y="-50%" width="200%" height="200%">` +
+        `<feGaussianBlur stdDeviation="10"/></filter></defs>` +
+        `<rect fill="white" width="100" height="100"/>` +
+        `<rect fill="black" x="${MASK_X}" y="${MASK_Y}" width="${MASK_W}" height="${MASK_H}" rx="${MASK_R}" filter="url(#f)"/>` +
+        `</svg>`
+    );
+    const svgMaskUrl = `url("data:image/svg+xml,${svgMask}")`;
+
     return (
         <div aria-hidden="true" style={{
             position: "fixed", top: 0, left: 0,
@@ -231,7 +246,7 @@ export default function SandBackground() {
             zIndex: 0, background: "#000",
             overflow: "hidden", pointerEvents: "none",
         }}>
-            {/* Blur layer (scroll) */}
+            {/* Blur layer */}
             <div ref={wrapRef} style={{
                 position: "absolute", top: "-10%", left: "-10%",
                 width: "120%", height: "120%",
@@ -243,16 +258,18 @@ export default function SandBackground() {
                 <div ref={zoomRef} style={{
                     position: "absolute", inset: 0,
                     willChange: "transform",
-                    transformOrigin: "50% 45%",
+                    transformOrigin: `${FACE_X}% ${FACE_Y}%`,
                     transform: "scale(1)",
                 }}>
+                    {/* Video 1 — 17.mp4 */}
                     <video ref={v1Ref} muted playsInline preload="auto"
                         style={{ ...videoStyle, opacity: 1 }}>
-                        <source src="/videos/13.mp4" type="video/mp4" />
+                        <source src="/videos/17.mp4" type="video/mp4" />
                     </video>
+                    {/* Video 2 — 18.mp4 loop */}
                     <video ref={v2Ref} muted playsInline preload="auto" loop
                         style={{ ...videoStyle, opacity: 0 }}>
-                        <source src="/videos/15.mp4" type="video/mp4" />
+                        <source src="/videos/18.mp4" type="video/mp4" />
                     </video>
                 </div>
             </div>
@@ -264,40 +281,29 @@ export default function SandBackground() {
                 pointerEvents: "none", zIndex: 2,
             }} />
 
-            {/* Vignette intro — zone transparente qui rétrécit vers le visage */}
+            {/* Vignette intro */}
             <div ref={introVigRef} style={{
                 position: "absolute", inset: 0, opacity: 0,
                 pointerEvents: "none", zIndex: 3,
             }} />
 
-            {/* Fumée noire SVG masquée — centrée sur le visage */}
-            <div ref={introSmokeRef} style={(() => {
-                const svg = encodeURIComponent(
-                    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">` +
-                    `<defs><filter id="f" x="-50%" y="-50%" width="200%" height="200%">` +
-                    `<feGaussianBlur stdDeviation="10"/></filter></defs>` +
-                    `<rect fill="white" width="100" height="100"/>` +
-                    `<rect fill="black" x="33" y="24" width="34" height="38" rx="6" filter="url(#f)"/>` +
-                    `</svg>`
-                );
-                const mask = `url("data:image/svg+xml,${svg}")`;
-                return {
-                    position: "absolute" as const, inset: 0, opacity: 0,
-                    pointerEvents: "none" as const, zIndex: 4,
-                    background: "rgba(0,0,0,0.88)",
-                    WebkitMaskImage: mask, maskImage: mask,
-                    WebkitMaskSize: "100% 100%", maskSize: "100% 100%",
-                    maskMode: "luminance" as const,
-                };
-            })()} />
+            {/* Fumée noire SVG */}
+            <div ref={introSmokeRef} style={{
+                position: "absolute", inset: 0, opacity: 0,
+                pointerEvents: "none", zIndex: 4,
+                background: "rgba(0,0,0,0.88)",
+                WebkitMaskImage: svgMaskUrl, maskImage: svgMaskUrl,
+                WebkitMaskSize: "100% 100%", maskSize: "100% 100%",
+                maskMode: "luminance",
+            }} />
 
-            {/* Overlay sombre cinématique */}
+            {/* Overlay sombre */}
             <div style={{
                 position: "absolute", inset: 0,
                 background: "rgba(0,0,0,0.38)", pointerEvents: "none",
             }} />
 
-            {/* Smoke overlay scroll */}
+            {/* Smoke scroll */}
             <div ref={smokeOverlayRef} style={{
                 position: "absolute", inset: 0, background: "black",
                 opacity: isHome ? 0 : 0.55, pointerEvents: "none",
@@ -307,7 +313,7 @@ export default function SandBackground() {
             {/* Vignette permanente */}
             <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
-                background: "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)",
+                background: `radial-gradient(ellipse at ${FACE_X}% ${FACE_Y}%, transparent 35%, rgba(0,0,0,0.55) 100%)`,
             }} />
 
             {/* Fondu haut */}
@@ -324,13 +330,12 @@ export default function SandBackground() {
                 pointerEvents: "none",
             }} />
 
-            {/* Scroll hint — home seulement */}
+            {/* Scroll hint */}
             {isHome && (
                 <div ref={hintRef} style={{
                     position: "absolute",
                     bottom: "max(44px, env(safe-area-inset-bottom, 44px))",
-                    left: "50%",
-                    transform: "translateX(-50%)",
+                    left: "50%", transform: "translateX(-50%)",
                     display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
                     pointerEvents: "none", zIndex: 10,
                 }}>

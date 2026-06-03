@@ -132,15 +132,15 @@ export default function Hero() {
                         }}
                     >
                         {/* wrapper drop-shadow = arêtes champagne, comme stroke du SVG */}
-                        <div className="flex flex-col items-center gap-20">
+                        <div className="flex flex-col items-center gap-4 sm:gap-6 md:gap-8">
                             <div className="animate-metalGlow" style={{
                                 filter: "drop-shadow(0 0 0.4px rgba(214,179,106,0.65)) drop-shadow(0 0 1px rgba(214,179,106,0.25))",
                             }}>
                                 <span className="metal-shine-text" style={{
                                     fontFamily: "var(--font-syncopate)",
-                                    fontSize: "clamp(1.4rem, 7.5vw, 4.2rem)",
+                                    fontSize: "clamp(1.1rem, 6.5vw, 4.2rem)",
                                     fontWeight: 700,
-                                    letterSpacing: "0.25em",
+                                    letterSpacing: "0.20em",
                                     textTransform: "uppercase",
                                     whiteSpace: "nowrap",
                                 }}>
@@ -152,17 +152,17 @@ export default function Hero() {
                             }}>
                                 <span className="metal-shine-text" style={{
                                     fontFamily: "var(--font-syncopate)",
-                                    fontSize: "clamp(0.55rem, 2.2vw, 1.45rem)",
+                                    fontSize: "clamp(0.55rem, 2.8vw, 1.5rem)",
                                     fontWeight: 600,
-                                    letterSpacing: "0.18em",
+                                    letterSpacing: "0.12em",
                                     textTransform: "uppercase",
                                     textAlign: "center",
                                     display: "block",
                                     lineHeight: 1.6,
-                                    padding: "0 1rem",
+                                    padding: "0 0.5rem",
                                 }}>
-                                    Pendant que vous dirigez la vision,<br />
-                                    Scalset exécute le reste.
+                                    On s&apos;occupe de votre équipe.<br />
+                                    Vous développez votre business.
                                 </span>
                             </div>
                         </div>
@@ -262,35 +262,16 @@ export default function Hero() {
             {/* SECTION 2 */}
             <section className="relative overflow-hidden -mt-10 md:-mt-20" style={{ minHeight: 'max(100dvh, 600px)' }}>
 
-                <div className="absolute inset-0">
-                    <ParticleText
-                        lines={["On s'occupe de votre équipe.", "Vous développez votre business."]}
-                        ariaLabel="On s'occupe de votre équipe. Vous développez votre business."
-                        className="mx-auto text-[clamp(1.1rem,3.8vw,5.2rem)] font-bold tracking-tighter leading-[1.15] py-2 md:py-4 px-4"
-                        yOffset={offsets.sec2Text}
-                    />
-
-                    {/* SCALSET SIGNATURE ON SECOND PAGE */}
-                    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full h-32 opacity-80 pointer-events-none hidden md:block">
-                        <ParticleText
-                            lines={["SCALSET"]}
-                            ariaLabel="Scalset Signature"
-                            className="text-[clamp(1.2rem,2.5vw,2.8rem)] font-bold tracking-[0.3em] uppercase"
-                            yOffset={0}
-                        />
-                    </div>
-                </div>
-
-                {/* SUBTITLE & CTA */}
+                {/* SUBTITLE & CTA — centré */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 1, ease: "easeOut", delay: 0.35 }}
-                    className="absolute bottom-8 sm:bottom-14 md:bottom-20 lg:bottom-24 inset-x-0 flex flex-col items-center gap-4 md:gap-8 px-4 sm:px-6 text-center"
+                    transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-6 md:gap-10 px-4 sm:px-6 text-center"
                 >
-                    {/* Volumetric Golden Light behind text */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] w-full max-w-4xl h-75 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.35)_0%,transparent_60%)] blur-[30px] pointer-events-none" />
+                    {/* Volumetric Golden Light */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-64 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.30)_0%,transparent_60%)] blur-[30px] pointer-events-none" />
 
                     <h3
                         className="relative z-10 max-w-3xl text-[0.85rem] sm:text-[1.05rem] md:text-[1.5rem] lg:text-[2.1rem] font-bold leading-[1.4] tracking-wide px-2 metal-shine-text"

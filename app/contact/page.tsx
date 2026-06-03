@@ -74,7 +74,7 @@ export default function ContactPage() {
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     placeholder="Jean Dupont"
-                                    className="w-full bg-[#0d0d14] border border-white/10 rounded-xl px-5 py-4 text-white placeholder-slate-600 focus:outline-hidden focus:border-slate-400 focus:shadow-[0_0_15px_rgba(148,163,184,0.15)] transition-all duration-300"
+                                    className="w-full bg-[#0d0d14] border border-white/10 rounded-xl px-4 sm:px-5 py-3 sm:py-4 text-white placeholder-slate-600 focus:outline-hidden focus:border-slate-400 focus:shadow-[0_0_15px_rgba(148,163,184,0.15)] transition-all duration-300"
                                 />
                             </div>
 

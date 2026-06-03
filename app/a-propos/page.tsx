@@ -251,7 +251,7 @@ export default function APropos() {
                     <div className="flex flex-col lg:flex-row gap-16 lg:gap-8 items-start relative">
                         {/* Sticky Text Side */}
                         <div className="lg:w-5/12 lg:sticky lg:top-32 flex flex-col gap-8 z-10">
-                            <h2 className="text-5xl lg:text-7xl font-bold tracking-tight text-white leading-none">
+                            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-none">
                                 Notre <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 to-slate-600 font-black italic pr-4">ADN</span>
                             </h2>
                             <p className="text-lg lg:text-xl text-slate-400 leading-relaxed max-w-md">

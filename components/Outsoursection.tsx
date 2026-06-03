@@ -44,7 +44,7 @@ export default function Outsoursection() {
             className="relative py-20 px-6 md:px-12 lg:px-20"
         >
 
-            <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.4fr_1fr] gap-6 items-start">
+            <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_1.4fr_1fr] gap-6 items-start">
 
                 {/* LEFT COLUMN: tall image + stats */}
                 <div className="flex flex-col gap-6">

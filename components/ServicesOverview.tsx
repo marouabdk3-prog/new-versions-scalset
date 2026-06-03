@@ -13,7 +13,7 @@ const services = [
 
 export default function ServicesOverview() {
     return (
-        <section className="py-32 px-6 md:px-12 lg:px-20 relative z-10 border-t border-white/5 max-[768px]:py-24 max-[480px]:py-16 max-[480px]:px-4">
+        <section className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-20 relative z-10 border-t border-white/5">
             <div className="max-w-7xl mx-auto flex flex-col gap-16">
 
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
