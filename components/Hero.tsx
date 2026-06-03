@@ -2,12 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import ParticleLogo from "./ParticleLogo";
 import ParticleText from "./ParticleText";
 import SandButton from "./SandButton";
 
 export default function Hero() {
+    const pathname  = usePathname();
+    const isHome    = pathname === "/";
+
+    // Sur la home, logo/texte apparaissent après le zoom intro
+    const [introReady, setIntroReady] = useState(!isHome);
+
     const [shouldExplode, setShouldExplode] = useState(false);
     const [exitLeft, setExitLeft] = useState(false);
     const [sandExited, setSandExited] = useState(true);
@@ -17,32 +24,53 @@ export default function Hero() {
     const [sandLogoSize, setSandLogoSize] = useState(280);
 
     useEffect(() => {
+        if (!isHome) return;
+        const onDone = () => setIntroReady(true);
+        window.addEventListener("intro-complete", onDone, { once: true });
+        return () => window.removeEventListener("intro-complete", onDone);
+    }, [isHome]);
+
+    useEffect(() => {
         const updateLayout = () => {
             const w = window.innerWidth;
             const h = window.innerHeight;
             setIsMobile(w < 768);
 
-            const isPortraitMobile = w < 768 && h > w;
-            const aspect = w / h;
-            const isSquareish = aspect < 1.1;
+            const isPortraitMobile  = w < 768 && h > w;
+            const isLandscapeMobile = w < 1024 && h < 500;
+            const isTablet          = w >= 768 && w < 1024;
+            const aspect            = w / h;
+            const isSquareish       = aspect < 1.1;
 
-            if (w > 1024 && !isSquareish) {
+            if (w >= 1280) {
+                // Large desktop
                 setOffsets({ text: Math.round(h * 0.30), logo: -Math.round(h * 0.18), sec2Text: -150 });
-            } else if (w >= 768 || (w > 1024 && isSquareish)) {
-                setOffsets({ text: h * 0.28, logo: -h * 0.20, sec2Text: -120 });
+            } else if (w >= 1024 && !isSquareish) {
+                // Desktop
+                setOffsets({ text: Math.round(h * 0.28), logo: -Math.round(h * 0.17), sec2Text: -130 });
+            } else if (isTablet || (w >= 1024 && isSquareish)) {
+                // Tablet
+                setOffsets({ text: h * 0.25, logo: -h * 0.18, sec2Text: -100 });
+            } else if (isLandscapeMobile) {
+                // Mobile paysage
+                setOffsets({ text: h * 0.16, logo: -h * 0.18, sec2Text: -h * 0.22 });
             } else if (isPortraitMobile) {
+                // Mobile portrait
                 setOffsets({ text: h * 0.20, logo: -h * 0.14, sec2Text: -h * 0.28 });
             } else {
-                setOffsets({ text: h * 0.18, logo: -h * 0.20, sec2Text: -h * 0.25 });
+                setOffsets({ text: h * 0.18, logo: -h * 0.16, sec2Text: -h * 0.24 });
             }
 
-            const isLandscapeMobile = h < 500;
-            let mobileScale = 0.58;
-            if (w <= 1024 || isSquareish) {
-                const baseScale = isPortraitMobile ? 0.46 : (isLandscapeMobile ? 0.34 : 0.50);
-                mobileScale = Math.min(baseScale, aspect * 0.70);
-            }
-            setSandLogoSize(Math.min(w, h) * mobileScale);
+            // Taille du logo selon l'écran
+            let logoScale: number;
+            if (w >= 1280)          logoScale = 0.42;
+            else if (w >= 1024)     logoScale = 0.46;
+            else if (isTablet)      logoScale = Math.min(0.44, aspect * 0.55);
+            else if (isLandscapeMobile) logoScale = Math.min(0.28, aspect * 0.32);
+            else if (isPortraitMobile)  logoScale = Math.min(0.44, (w / 375) * 0.44);
+            else                    logoScale = Math.min(0.40, aspect * 0.50);
+
+            setSandLogoSize(Math.min(w, h) * logoScale);
         };
 
         updateLayout();
@@ -88,11 +116,11 @@ export default function Hero() {
                 )}
 
                 {/* SCALSET texte statique — même couleur que 100.svg, apparaît avec le logo */}
-                {sandExited && (
+                {sandExited && introReady && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        transition={{ duration: 1.2, ease: "easeOut" }}
                         style={{
                             position: "absolute",
                             inset: 0,
@@ -142,11 +170,11 @@ export default function Hero() {
                 )}
 
                 {/* LOGO métallique 100.svg */}
-                {sandExited && (
+                {sandExited && introReady && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        transition={{ duration: 1.2, ease: "easeOut" }}
                         className="absolute inset-0 pointer-events-none select-none"
                     >
                         <div style={{

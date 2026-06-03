@@ -3,17 +3,14 @@
 import { useRef, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import gsap from "gsap";
 
-// Centre du visage du monsieur dans 202.png
 const ZOOM_CX = 50;
 const ZOOM_CY = 43;
 
-// Zone nette centrée sur le visage
-const SCR_X  = 35;   // bord gauche de la zone nette
-const SCR_Y  = 26;   // bord haut de la zone nette
-const SCR_W  = 30;   // largeur
-const SCR_H  = 34;   // hauteur
+const SCR_X  = 35;
+const SCR_Y  = 26;
+const SCR_W  = 30;
+const SCR_H  = 34;
 const SCR_RX = 4;
 
 export default function MercuryIntro() {
@@ -23,10 +20,10 @@ export default function MercuryIntro() {
   const doneRef         = useRef(false);
   const progressRef     = useRef(0);
 
-  const imgWrapRef    = useRef<HTMLDivElement>(null);
-  const blurLayerRef  = useRef<HTMLDivElement>(null);
-  const smokeRef      = useRef<HTMLDivElement>(null);
-  const hintRef       = useRef<HTMLDivElement>(null);
+  const imgWrapRef     = useRef<HTMLDivElement>(null);
+  const blurLayerRef   = useRef<HTMLDivElement>(null);
+  const smokeRef       = useRef<HTMLDivElement>(null);
+  const hintRef        = useRef<HTMLDivElement>(null);
   const portalFiredRef = useRef(false);
 
   useEffect(() => {
@@ -36,65 +33,49 @@ export default function MercuryIntro() {
     document.body.classList.add("intro-active");
     document.body.classList.add("intro-no-events");
 
-    const tl = gsap.timeline({ paused: true });
-
-    // Hint
-    tl.to(hintRef.current, { opacity: 0, ease: "none", duration: 0.08 }, 0);
-
-    // ── Zoom vers le centre de l'écran laptop ──
-    // transform-origin verrouillé sur ZOOM_CX/ZOOM_CY → le laptop screen reste centré
-    tl.fromTo(imgWrapRef.current,
-      { scale: 1 },
-      { scale: 2.2, ease: "none", duration: 1 },
-      0
-    );
-
-    // ── Fade out de l'image (site déjà visible derrière depuis 40%) ──
-    tl.to(imgWrapRef.current, { opacity: 0, ease: "power1.in", duration: 0.30 }, 0.62);
-
-    const advance = (delta: number) => {
-      if (doneRef.current) return;
-      progressRef.current = Math.min(1, Math.max(0, progressRef.current + delta / 1200));
-
-      gsap.to(tl, {
-        progress: progressRef.current,
-        duration: 0.75,
-        ease: "power2.out",
-        overwrite: true,
-      });
-
-      // ── Noir progressif autour du visage dès le premier scroll ──
+    const apply = (p: number) => {
+      // ── Zoom direct ──
+      if (imgWrapRef.current) {
+        const scale   = 1 + p * 1.4;
+        const opacity = p >= 0.62 ? Math.max(0, 1 - (p - 0.62) / 0.30) : 1;
+        imgWrapRef.current.style.transform = `scale(${scale.toFixed(4)})`;
+        imgWrapRef.current.style.opacity   = opacity.toFixed(4);
+      }
+      // ── Hint ──
+      if (hintRef.current) {
+        hintRef.current.style.opacity = String(Math.max(0, 1 - p * 15));
+      }
+      // ── Fumée noire autour du visage ──
       if (blurLayerRef.current) {
-        const p = progressRef.current;
-        blurLayerRef.current.style.opacity = Math.min(1, p * 1.6).toFixed(3);
+        blurLayerRef.current.style.opacity = Math.min(1, p * 1.8).toFixed(3);
       }
-
-      // ── Fumée noire progressive dès le début du zoom ──
       if (smokeRef.current) {
-        const smokeOpacity = Math.min(1, progressRef.current * 1.2).toFixed(3);
-        smokeRef.current.style.opacity = smokeOpacity;
+        smokeRef.current.style.opacity = Math.min(1, p * 1.4).toFixed(3);
       }
-
-
-      // ── Fire portal-entry at 65% so background de-zoom starts as overlay fades ──
-      if (progressRef.current >= 0.65 && !portalFiredRef.current) {
+      // ── Portal à 65% ──
+      if (p >= 0.65 && !portalFiredRef.current) {
         portalFiredRef.current = true;
         window.dispatchEvent(new CustomEvent("site-portal-entry"));
       }
-
-      // ── Reveal site à 40% : largement avant fade image (62%) → pas de noir ──
-      if (progressRef.current >= 0.40) {
+      // ── Révèle site à 40% ──
+      if (p >= 0.40) {
         document.body.classList.remove("intro-active");
       } else {
         document.body.classList.add("intro-active");
       }
-
-      if (progressRef.current >= 1 && !doneRef.current) {
+      // ── Fin ──
+      if (p >= 1 && !doneRef.current) {
         doneRef.current = true;
         document.body.style.overflow = "";
         document.body.classList.remove("intro-no-events");
         setTimeout(() => setDone(true), 400);
       }
+    };
+
+    const advance = (delta: number) => {
+      if (doneRef.current) return;
+      progressRef.current = Math.min(1, Math.max(0, progressRef.current + delta / 1200));
+      apply(progressRef.current);
     };
 
     const onWheel = (e: WheelEvent) => {
@@ -116,7 +97,6 @@ export default function MercuryIntro() {
     window.addEventListener("touchmove",  onTouchMove,  { passive: false });
 
     return () => {
-      tl.kill();
       window.removeEventListener("wheel",      onWheel);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove",  onTouchMove);
@@ -127,12 +107,9 @@ export default function MercuryIntro() {
     };
   }, [isHome, done]);
 
+  return null;
   if (!isHome || done) return null;
 
-  // Masque SVG rectangulaire arrondi :
-  // fond blanc = blur layer visible (bords flous)
-  // rect noir  = blur layer masqué → image nette dessous (écran laptop)
-  // feGaussianBlur = transition douce sur les bords du rectangle
   const svgMask = encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">` +
     `<defs><filter id="f" x="-50%" y="-50%" width="200%" height="200%">` +
@@ -144,20 +121,22 @@ export default function MercuryIntro() {
   const mask = `url("data:image/svg+xml,${svgMask}")`;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "transparent", pointerEvents: "none" }}>
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 100,
+      overflow: "hidden", pointerEvents: "none",
+    }}>
 
-      {/* ── Wrapper principal : zoom vers l'écran laptop ── */}
+      {/* Wrapper zoomable — centré sur le visage */}
       <div
         ref={imgWrapRef}
         style={{
           position: "absolute", inset: 0,
           transformOrigin: `${ZOOM_CX}% ${ZOOM_CY}%`,
+          transform: "scale(1)",
+          transition: "transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease",
           willChange: "transform, opacity",
-          backfaceVisibility: "hidden",
-          WebkitBackfaceVisibility: "hidden",
         }}
       >
-        {/* Layer 1 : image nette — toujours sharp, jamais de blur */}
         <Image
           src="/202.png"
           alt=""
@@ -169,55 +148,41 @@ export default function MercuryIntro() {
           sizes="100vw"
         />
 
-        {/* Layer 2 : même image floutée, masquée pour ne montrer que les bords.
-            Le centre (laptop screen) laisse transparaître le layer 1 net en dessous.
-            filter: blur() animé par JS dans advance() → 0 → 14px selon le scroll. */}
+        {/* Noir autour du visage */}
         <div
           ref={blurLayerRef}
           style={{
             position: "absolute", inset: 0,
-            background: "black",
-            opacity: 0,
-            filter: "blur(0px)",
-            WebkitMaskImage: mask,
-            maskImage: mask,
-            WebkitMaskSize: "100% 100%",
-            maskSize: "100% 100%",
-            maskMode: "luminance",
-            pointerEvents: "none",
+            background: "black", opacity: 0,
+            WebkitMaskImage: mask, maskImage: mask,
+            WebkitMaskSize: "100% 100%", maskSize: "100% 100%",
+            maskMode: "luminance", pointerEvents: "none",
           }}
         />
 
-        {/* Fumée noire autour du visage — s'intensifie avec le zoom */}
+        {/* Fumée noire */}
         <div ref={smokeRef} style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: "rgba(0,0,0,0.78)",
-          opacity: 0,
-          WebkitMaskImage: mask,
-          maskImage: mask,
-          WebkitMaskSize: "100% 100%",
-          maskSize: "100% 100%",
+          background: "rgba(0,0,0,0.85)", opacity: 0,
+          WebkitMaskImage: mask, maskImage: mask,
+          WebkitMaskSize: "100% 100%", maskSize: "100% 100%",
           maskMode: "luminance",
         }} />
 
-        {/* Vignette cinématique — zone centrale large pour ne pas toucher le visage */}
+        {/* Vignette */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: `radial-gradient(ellipse at ${ZOOM_CX}% ${ZOOM_CY}%, transparent 32%, rgba(0,0,0,0.60) 58%, rgba(0,0,0,0.95) 100%)`,
+          background: `radial-gradient(ellipse at ${ZOOM_CX}% ${ZOOM_CY}%, transparent 28%, rgba(0,0,0,0.65) 55%, rgba(0,0,0,0.97) 100%)`,
         }} />
-
       </div>
 
       {/* Scroll hint */}
-      <div
-        ref={hintRef}
-        style={{
-          position: "absolute", bottom: 44, left: "50%",
-          transform: "translateX(-50%)",
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
-          pointerEvents: "none",
-        }}
-      >
+      <div ref={hintRef} style={{
+        position: "absolute", bottom: 44, left: "50%",
+        transform: "translateX(-50%)",
+        display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+        pointerEvents: "none",
+      }}>
         <span style={{
           color: "rgba(255,255,255,0.45)", fontSize: 9,
           letterSpacing: "0.32em", textTransform: "uppercase",

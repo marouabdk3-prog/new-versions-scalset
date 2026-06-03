@@ -6,122 +6,199 @@ import { usePathname } from "next/navigation";
 export default function SandBackground() {
     const pathname = usePathname();
     const isHome = pathname === "/";
-    const smokeOverlayRef = useRef<HTMLDivElement>(null);
-    // wrapRef    → filter/blur uniquement (scroll)
-    // zoomRef    → transform/scale uniquement
-    // entranceRef → entrance de-zoom after MercuryIntro portal
-    const wrapRef     = useRef<HTMLDivElement>(null);
-    const zoomRef     = useRef<HTMLDivElement>(null);
-    const entranceRef = useRef<HTMLDivElement>(null);
-    const video1Ref   = useRef<HTMLVideoElement>(null); // mp_ (5).mp4
-    const v2aRef      = useRef<HTMLVideoElement>(null); // 55.mp4 — instance A
-    const v2bRef      = useRef<HTMLVideoElement>(null); // 55.mp4 — instance B (standby)
-    const activeV2    = useRef<"a" | "b">("a");
 
-    // Chain: précharge v2a 1s avant la fin de v1 → swap opacity au cut
+    const wrapRef          = useRef<HTMLDivElement>(null);
+    const zoomRef          = useRef<HTMLDivElement>(null);
+    const smokeOverlayRef  = useRef<HTMLDivElement>(null);
+    const blackOverlayRef  = useRef<HTMLDivElement>(null);
+    const introVigRef      = useRef<HTMLDivElement>(null);  // vignette radiale fond
+    const introSmokeRef    = useRef<HTMLDivElement>(null);  // fumée noire masquée SVG
+    const hintRef          = useRef<HTMLDivElement>(null);  // "scroll to enter"
+    const v1Ref            = useRef<HTMLVideoElement>(null);
+    const v2Ref            = useRef<HTMLVideoElement>(null);
+
+    const switchedRef      = useRef(false);
+    const introDoneRef     = useRef(false);
+    const introProgressRef = useRef(0);
+    const portalFiredRef   = useRef(false);
+
+    // ── Preload v2 silently ──
     useEffect(() => {
-        const v1  = video1Ref.current;
-        const v2a = v2aRef.current;
-        if (!v1 || !v2a) return;
+        const v2 = v2Ref.current;
+        if (!v2) return;
+        v2.load();
+        v2.currentTime = 0;
+    }, []);
 
-        let preloadStarted = false;
+    // ── v1 → v2 : transition noire ──
+    useEffect(() => {
+        const v1      = v1Ref.current;
+        const v2      = v2Ref.current;
+        const overlay = blackOverlayRef.current;
+        if (!v1 || !v2 || !overlay) return;
 
-        const onV1TimeUpdate = () => {
-            if (!preloadStarted && v1.duration && v1.currentTime >= v1.duration - 1) {
-                preloadStarted = true;
-                v2a.currentTime = 1;
-                v2a.play().catch(() => {});
+        const onTimeUpdate = () => {
+            if (switchedRef.current) return;
+            if (!v1.duration) return;
+            if (v1.currentTime >= v1.duration - 0.35) {
+                switchedRef.current = true;
+                overlay.style.transition = "opacity 0.3s ease";
+                overlay.style.opacity    = "1";
+                setTimeout(() => {
+                    v2.currentTime   = 0;
+                    v2.play().catch(() => {});
+                    v1.style.opacity = "0";
+                    v2.style.opacity = "1";
+                    requestAnimationFrame(() => {
+                        overlay.style.transition = "opacity 0.35s ease";
+                        overlay.style.opacity    = "0";
+                    });
+                }, 300);
             }
         };
 
-        const onV1Ended = () => {
-            v2a.style.opacity = "1";
-            v1.style.opacity  = "0";
+        v1.addEventListener("timeupdate", onTimeUpdate);
+        return () => v1.removeEventListener("timeupdate", onTimeUpdate);
+    }, []);
+
+    // ── Intro scroll (home) : vidéo gelée → scroll zoom + noir → lecture ──
+    useEffect(() => {
+        if (!isHome) return;
+        const v1   = v1Ref.current;
+        const zoom = zoomRef.current;
+        if (!v1 || !zoom) return;
+
+        v1.currentTime = 0;
+        v1.pause();
+
+        document.body.style.overflow = "hidden";
+        document.body.classList.add("intro-active");
+        document.body.classList.add("intro-no-events");
+
+        const apply = (p: number) => {
+            // Zoom progressif sur le sujet
+            const scale = 1 + p * 0.85;
+            zoom.style.transition = "transform 0.45s cubic-bezier(0.16,1,0.3,1)";
+            zoom.style.transform  = `scale(${scale.toFixed(4)})`;
+
+            // Zone transparente qui rétrécit vers le visage
+            const clearW = Math.max(10, 52 - p * 44);   // 52% → 8%
+            const clearH = Math.max(14, 68 - p * 56);   // 68% → 12%
+            const dark1  = (p * 0.72).toFixed(2);
+            const dark2  = Math.min(1, p * 1.05).toFixed(2);
+            if (introVigRef.current) {
+                introVigRef.current.style.background =
+                    `radial-gradient(ellipse ${clearW.toFixed(1)}% ${clearH.toFixed(1)}% at 50% 40%, ` +
+                    `transparent 60%, rgba(0,0,0,${dark1}) 78%, rgba(0,0,0,${dark2}) 100%)`;
+                introVigRef.current.style.opacity = Math.min(1, p * 1.1).toFixed(3);
+            }
+            // Fumée noire avec blur SVG — s'intensifie autour du visage
+            if (introSmokeRef.current) {
+                introSmokeRef.current.style.opacity = Math.min(1, p * 1.3).toFixed(3);
+            }
+
+            // Hint disparaît dès 1er scroll
+            if (hintRef.current) {
+                hintRef.current.style.opacity = String(Math.max(0, 1 - p * 14));
+            }
+
+            // À 65% : démarre la vidéo
+            if (p >= 0.65 && !portalFiredRef.current) {
+                portalFiredRef.current = true;
+                v1.play().catch(() => {});
+            }
+
+            // Révèle le site à 40%
+            if (p >= 0.40) {
+                document.body.classList.remove("intro-active");
+            } else {
+                document.body.classList.add("intro-active");
+            }
+
+            // Fin intro
+            if (p >= 1 && !introDoneRef.current) {
+                introDoneRef.current = true;
+                document.body.style.overflow = "";
+                document.body.classList.remove("intro-no-events");
+                window.dispatchEvent(new CustomEvent("intro-complete"));
+                // Fade out vignette + fumée intro
+                if (introVigRef.current) {
+                    introVigRef.current.style.transition = "opacity 0.9s ease";
+                    introVigRef.current.style.opacity    = "0";
+                }
+                if (introSmokeRef.current) {
+                    introSmokeRef.current.style.transition = "opacity 0.9s ease";
+                    introSmokeRef.current.style.opacity    = "0";
+                }
+                // Règle le zoom à 1.05 (position normale)
+                zoom.style.transition = "transform 1.4s cubic-bezier(0.16,1,0.3,1)";
+                zoom.style.transform  = "scale(1.05)";
+                // Cache le hint
+                if (hintRef.current) hintRef.current.style.display = "none";
+            }
         };
 
-        v1.addEventListener("timeupdate", onV1TimeUpdate);
-        v1.addEventListener("ended", onV1Ended);
+        const advance = (delta: number) => {
+            if (introDoneRef.current) return;
+            introProgressRef.current = Math.min(1, Math.max(0, introProgressRef.current + delta / 1200));
+            apply(introProgressRef.current);
+        };
+
+        const onWheel = (e: WheelEvent) => { e.preventDefault(); advance(e.deltaY); };
+        let ty = 0;
+        const onTouchStart = (e: TouchEvent) => { ty = e.touches[0].clientY; };
+        const onTouchMove  = (e: TouchEvent) => {
+            e.preventDefault();
+            const d = ty - e.touches[0].clientY;
+            ty = e.touches[0].clientY;
+            advance(d * 3);
+        };
+
+        window.addEventListener("wheel",      onWheel,      { passive: false });
+        window.addEventListener("touchstart", onTouchStart, { passive: false });
+        window.addEventListener("touchmove",  onTouchMove,  { passive: false });
+
         return () => {
-            v1.removeEventListener("timeupdate", onV1TimeUpdate);
-            v1.removeEventListener("ended", onV1Ended);
+            window.removeEventListener("wheel",      onWheel);
+            window.removeEventListener("touchstart", onTouchStart);
+            window.removeEventListener("touchmove",  onTouchMove);
+            document.body.style.overflow = "";
+            document.body.classList.remove("intro-active");
+            document.body.classList.remove("intro-no-events");
         };
-    }, []);
+    }, [isHome]);
 
-    // Dual-video seamless loop: standby joue déjà depuis t=1 avant le swap → pas de seek = pas de freeze
+    // ── Non-home : démarre vidéo immédiatement ──
     useEffect(() => {
-        const v2a = v2aRef.current;
-        const v2b = v2bRef.current;
-        if (!v2a || !v2b) return;
+        if (isHome) return;
+        const v1   = v1Ref.current;
+        const zoom = zoomRef.current;
+        if (!v1 || !zoom) return;
+        const t = setTimeout(() => {
+            zoom.style.transition = "transform 2.5s cubic-bezier(0.16,1,0.3,1)";
+            zoom.style.transform  = "scale(1.05)";
+            v1.play().catch(() => {});
+        }, 60);
+        return () => clearTimeout(t);
+    }, [isHome]);
 
-        let rafId: number;
-        let standbyStarted = false;
-
-        const tick = () => {
-            const active  = activeV2.current === "a" ? v2a : v2b;
-            const standby = activeV2.current === "a" ? v2b : v2a;
-
-            if (!active.paused) {
-                // 0.7s avant la fin : lance le standby depuis t=1 sans seek
-                if (!standbyStarted && active.currentTime >= 6.3) {
-                    standbyStarted = true;
-                    standby.currentTime = 1;
-                    standby.play().catch(() => {});
-                }
-
-                // 0.3s avant la fin : swap instantané (pas de transition CSS)
-                if (active.currentTime >= 6.7) {
-                    active.style.opacity  = "0";
-                    standby.style.opacity = "1";
-                    activeV2.current      = activeV2.current === "a" ? "b" : "a";
-                    standbyStarted        = false;
-                }
-            }
-
-            rafId = requestAnimationFrame(tick);
-        };
-        rafId = requestAnimationFrame(tick);
-        return () => cancelAnimationFrame(rafId);
-    }, []);
-
-
-    // Force smoke/blur state on page change
+    // ── Force smoke/blur sur pages internes ──
     useEffect(() => {
         if (!isHome) {
-            if (wrapRef.current)  wrapRef.current.style.filter  = "blur(10px)";
+            if (wrapRef.current)         wrapRef.current.style.filter         = "blur(10px)";
             if (smokeOverlayRef.current) smokeOverlayRef.current.style.opacity = "0.55";
         } else {
-            if (wrapRef.current)  wrapRef.current.style.filter  = "none";
+            if (wrapRef.current)         wrapRef.current.style.filter         = "none";
             if (smokeOverlayRef.current) smokeOverlayRef.current.style.opacity = "0";
         }
     }, [isHome]);
 
-    useEffect(() => {
-        if (!isHome) return;
-
-        const onPortalEntry = () => {
-            const el = entranceRef.current;
-            if (!el) return;
-            el.style.transition = "none";
-            el.style.transform = "scale(1.30)";
-            el.style.filter = "brightness(1.06) contrast(0.97)";
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    el.style.transition = "transform 2.4s cubic-bezier(0.16, 1, 0.3, 1), filter 1.8s ease";
-                    el.style.transform = "scale(1.00)";
-                    el.style.filter = "none";
-                });
-            });
-        };
-
-        window.addEventListener("site-portal-entry", onPortalEntry);
-        return () => window.removeEventListener("site-portal-entry", onPortalEntry);
-    }, [isHome]);
-
+    // ── Blur + smoke au scroll (post-intro) ──
     useEffect(() => {
         const onScroll = () => {
+            if (!isHome || !introDoneRef.current) return;
             const scrollY = window.scrollY;
-            const heroH = window.innerHeight;
-            if (!isHome) return;
+            const heroH   = window.innerHeight;
 
             const p1Start = heroH * 0.15;
             const p1End   = heroH * 0.80;
@@ -131,125 +208,106 @@ export default function SandBackground() {
             const p2End   = heroH * 1.4;
             const p2 = scrollY <= p2Start ? 0 : Math.min((scrollY - p2Start) / (p2End - p2Start), 1);
 
-            const blur  = p1 * 3 + p2 * 7;
-            const smoke = p1 * 0.15 + p2 * 0.40;
-
             if (wrapRef.current)
-                wrapRef.current.style.filter = blur > 0 ? `blur(${blur}px)` : "none";
+                wrapRef.current.style.filter = (p1 * 3 + p2 * 7) > 0 ? `blur(${p1 * 3 + p2 * 7}px)` : "none";
             if (smokeOverlayRef.current)
-                smokeOverlayRef.current.style.opacity = String(smoke);
+                smokeOverlayRef.current.style.opacity = String(p1 * 0.15 + p2 * 0.40);
         };
 
         window.addEventListener("scroll", onScroll, { passive: true });
-        onScroll();
         return () => window.removeEventListener("scroll", onScroll);
     }, [isHome]);
 
     const videoStyle: React.CSSProperties = {
         position: "absolute", inset: 0,
         width: "100%", height: "100%",
-        objectFit: "cover",
-        objectPosition: "center center",
-        transition: "opacity 0.001s ease",
+        objectFit: "cover", objectPosition: "center center",
     };
 
     return (
-        <div
-            aria-hidden="true"
-            style={{
-                position: "fixed", top: 0, left: 0,
-                width: "100%", height: "100%",
-                zIndex: 0, background: "#000",
-                overflow: "hidden", pointerEvents: "none",
-            }}
-        >
-            {/* Couche entrance — de-zoom portal after MercuryIntro */}
-            <div
-                ref={entranceRef}
-                style={{
+        <div aria-hidden="true" style={{
+            position: "fixed", top: 0, left: 0,
+            width: "100%", height: "100%",
+            zIndex: 0, background: "#000",
+            overflow: "hidden", pointerEvents: "none",
+        }}>
+            {/* Blur layer (scroll) */}
+            <div ref={wrapRef} style={{
+                position: "absolute", top: "-10%", left: "-10%",
+                width: "120%", height: "120%",
+                willChange: "filter",
+                filter: isHome ? "none" : "blur(10px)",
+                transition: "filter 0.6s ease",
+            }}>
+                {/* Zoom layer */}
+                <div ref={zoomRef} style={{
                     position: "absolute", inset: 0,
-                    willChange: "transform, filter",
-                    transformOrigin: "50% 70%",
-                }}
-            >
-                {/* Couche filter — blur du scroll uniquement */}
-                <div
-                    ref={wrapRef}
-                    style={{
-                        position: "absolute",
-                        top: "-10%", left: "-10%",
-                        width: "120%", height: "120%",
-                        willChange: "filter",
-                        filter: isHome ? "none" : "blur(10px)",
-                        transition: "filter 0.6s ease",
-                    }}
-                >
-                    {/* Couche zoom — transform uniquement */}
-                    <div
-                        ref={zoomRef}
-                        style={{
-                            position: "absolute", inset: 0,
-                            willChange: "transform",
-                            transformOrigin: "center center",
-                        }}
-                    >
-                        {/* Video 1 — joue en premier */}
-                        <video
-                            ref={video1Ref}
-                            autoPlay
-                            muted
-                            playsInline
-                            style={{ ...videoStyle, opacity: 1 }}
-                        >
-                            <source src="/videos/new.mp4" type="video/mp4" />
-                        </video>
-
-                        {/* Video 2A — instance active, boucle duale sans seek */}
-                        <video
-                            ref={v2aRef}
-                            muted
-                            playsInline
-                            preload="auto"
-                            style={{ ...videoStyle, opacity: 0 }}
-                        >
-                            <source src="/videos/55.mp4" type="video/mp4" />
-                        </video>
-
-                        {/* Video 2B — instance standby, prête avant chaque swap */}
-                        <video
-                            ref={v2bRef}
-                            muted
-                            playsInline
-                            preload="auto"
-                            style={{ ...videoStyle, opacity: 0 }}
-                        >
-                            <source src="/videos/55.mp4" type="video/mp4" />
-                        </video>
-                    </div>
+                    willChange: "transform",
+                    transformOrigin: "50% 45%",
+                    transform: "scale(1)",
+                }}>
+                    <video ref={v1Ref} muted playsInline preload="auto"
+                        style={{ ...videoStyle, opacity: 1 }}>
+                        <source src="/videos/13.mp4" type="video/mp4" />
+                    </video>
+                    <video ref={v2Ref} muted playsInline preload="auto" loop
+                        style={{ ...videoStyle, opacity: 0 }}>
+                        <source src="/videos/15.mp4" type="video/mp4" />
+                    </video>
                 </div>
             </div>
+
+            {/* Transition noire v1→v2 */}
+            <div ref={blackOverlayRef} style={{
+                position: "absolute", inset: 0,
+                background: "#000", opacity: 0,
+                pointerEvents: "none", zIndex: 2,
+            }} />
+
+            {/* Vignette intro — zone transparente qui rétrécit vers le visage */}
+            <div ref={introVigRef} style={{
+                position: "absolute", inset: 0, opacity: 0,
+                pointerEvents: "none", zIndex: 3,
+            }} />
+
+            {/* Fumée noire SVG masquée — centrée sur le visage */}
+            <div ref={introSmokeRef} style={(() => {
+                const svg = encodeURIComponent(
+                    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">` +
+                    `<defs><filter id="f" x="-50%" y="-50%" width="200%" height="200%">` +
+                    `<feGaussianBlur stdDeviation="10"/></filter></defs>` +
+                    `<rect fill="white" width="100" height="100"/>` +
+                    `<rect fill="black" x="33" y="24" width="34" height="38" rx="6" filter="url(#f)"/>` +
+                    `</svg>`
+                );
+                const mask = `url("data:image/svg+xml,${svg}")`;
+                return {
+                    position: "absolute" as const, inset: 0, opacity: 0,
+                    pointerEvents: "none" as const, zIndex: 4,
+                    background: "rgba(0,0,0,0.88)",
+                    WebkitMaskImage: mask, maskImage: mask,
+                    WebkitMaskSize: "100% 100%", maskSize: "100% 100%",
+                    maskMode: "luminance" as const,
+                };
+            })()} />
 
             {/* Overlay sombre cinématique */}
             <div style={{
                 position: "absolute", inset: 0,
-                background: "rgba(0,0,0,0.40)",
-                pointerEvents: "none",
+                background: "rgba(0,0,0,0.38)", pointerEvents: "none",
             }} />
 
-            {/* Smoke overlay au scroll */}
+            {/* Smoke overlay scroll */}
             <div ref={smokeOverlayRef} style={{
-                position: "absolute", inset: 0,
-                background: "black",
-                opacity: isHome ? 0 : 0.55,
-                pointerEvents: "none",
+                position: "absolute", inset: 0, background: "black",
+                opacity: isHome ? 0 : 0.55, pointerEvents: "none",
                 transition: "opacity 0.6s ease",
             }} />
 
-            {/* Vignette */}
+            {/* Vignette permanente */}
             <div style={{
-                position: "absolute", inset: 0,
+                position: "absolute", inset: 0, pointerEvents: "none",
                 background: "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)",
-                pointerEvents: "none",
             }} />
 
             {/* Fondu haut */}
@@ -265,6 +323,30 @@ export default function SandBackground() {
                 background: "linear-gradient(to top, rgba(0,0,0,0.70) 0%, transparent 100%)",
                 pointerEvents: "none",
             }} />
+
+            {/* Scroll hint — home seulement */}
+            {isHome && (
+                <div ref={hintRef} style={{
+                    position: "absolute",
+                    bottom: "max(44px, env(safe-area-inset-bottom, 44px))",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                    pointerEvents: "none", zIndex: 10,
+                }}>
+                    <span style={{
+                        color: "rgba(255,255,255,0.45)", fontSize: 9,
+                        letterSpacing: "0.32em", textTransform: "uppercase",
+                        fontFamily: "var(--font-space-grotesk)",
+                    }}>
+                        Scroll to enter
+                    </span>
+                    <div style={{
+                        width: 1, height: 40,
+                        background: "linear-gradient(to bottom, rgba(200,170,80,0.65), transparent)",
+                    }} />
+                </div>
+            )}
         </div>
     );
 }

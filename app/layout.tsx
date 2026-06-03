@@ -19,6 +19,12 @@ export const metadata: Metadata = {
   description: "Tu décides. ScalSet exécute. La croissance devient maîtrisée.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LogoAnimationProvider } from "@/components/LogoAnimationContext";

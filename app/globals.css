@@ -21,12 +21,24 @@
   --radius-pill: 9999px;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 @layer components {
