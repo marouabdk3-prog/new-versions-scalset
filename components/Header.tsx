@@ -24,7 +24,7 @@ export default function Header() {
     return (
         <div className="fixed top-0 left-0 right-0 z-110 flex items-start justify-between px-4 sm:px-6 pt-3 sm:pt-4">
 
-            {/* ── LOGO — gauche, séparé ── */}
+            {/* ── LOGO — gauche ── */}
             <motion.div
                 ref={navLogoRef}
                 initial={{ y: -40, opacity: 0 }}
@@ -45,7 +45,7 @@ export default function Header() {
                 </Link>
             </motion.div>
 
-            {/* ── NAV PILL — centre ── */}
+            {/* ── NAV PILL ── */}
             <motion.header
                 initial={{ y: -40, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}

@@ -1,295 +1,156 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
-import ParticleLogo from "./ParticleLogo";
-import ParticleText from "./ParticleText";
+import Link from "next/link";
 import SandButton from "./SandButton";
 
 export default function Hero() {
-    const pathname  = usePathname();
-    const isHome    = pathname === "/";
-
-    // Sur la home, logo/texte apparaissent après le zoom intro
-    const [introReady, setIntroReady] = useState(!isHome);
-
-    const [shouldExplode, setShouldExplode] = useState(false);
-    const [exitLeft, setExitLeft] = useState(false);
-    const [sandExited, setSandExited] = useState(true);
-
-    const [isMobile, setIsMobile] = useState(false);
-    const [offsets, setOffsets] = useState({ text: 230, logo: -30, sec2Text: -50 });
-    const [sandLogoSize, setSandLogoSize] = useState(280);
-
-    useEffect(() => {
-        if (!isHome) return;
-        const onDone = () => setIntroReady(true);
-        window.addEventListener("intro-complete", onDone, { once: true });
-        return () => window.removeEventListener("intro-complete", onDone);
-    }, [isHome]);
-
-    useEffect(() => {
-        const updateLayout = () => {
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-            setIsMobile(w < 768);
-
-            const isPortraitMobile  = w < 768 && h > w;
-            const isLandscapeMobile = w < 1024 && h < 500;
-            const isTablet          = w >= 768 && w < 1024;
-            const aspect            = w / h;
-            const isSquareish       = aspect < 1.1;
-
-            if (w >= 1280) {
-                // Large desktop
-                setOffsets({ text: Math.round(h * 0.30), logo: -Math.round(h * 0.18), sec2Text: -150 });
-            } else if (w >= 1024 && !isSquareish) {
-                // Desktop
-                setOffsets({ text: Math.round(h * 0.28), logo: -Math.round(h * 0.17), sec2Text: -130 });
-            } else if (isTablet || (w >= 1024 && isSquareish)) {
-                // Tablet
-                setOffsets({ text: h * 0.25, logo: -h * 0.18, sec2Text: -100 });
-            } else if (isLandscapeMobile) {
-                // Mobile paysage
-                setOffsets({ text: h * 0.16, logo: -h * 0.18, sec2Text: -h * 0.22 });
-            } else if (isPortraitMobile) {
-                // Mobile portrait
-                setOffsets({ text: h * 0.20, logo: -h * 0.14, sec2Text: -h * 0.28 });
-            } else {
-                setOffsets({ text: h * 0.18, logo: -h * 0.16, sec2Text: -h * 0.24 });
-            }
-
-            // Taille du logo selon l'écran
-            let logoScale: number;
-            if (w >= 1280)          logoScale = 0.42;
-            else if (w >= 1024)     logoScale = 0.46;
-            else if (isTablet)      logoScale = Math.min(0.44, aspect * 0.55);
-            else if (isLandscapeMobile) logoScale = Math.min(0.28, aspect * 0.32);
-            else if (isPortraitMobile)  logoScale = Math.min(0.44, (w / 375) * 0.44);
-            else                    logoScale = Math.min(0.40, aspect * 0.50);
-
-            setSandLogoSize(Math.min(w, h) * logoScale);
-        };
-
-        updateLayout();
-        window.addEventListener('resize', updateLayout);
-        return () => window.removeEventListener('resize', updateLayout);
-    }, []);
-
-    const { scrollY } = useScroll();
-
-    useMotionValueEvent(scrollY, "change", (latest) => {
-        if (latest > 100) {
-            setShouldExplode(true);
-        } else {
-            setShouldExplode(false);
-        }
-    });
-
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     return (
         <>
-            {/* HERO */}
-            <section className="relative overflow-hidden bg-transparent" style={{ height: '100dvh', minHeight: 500 }}>
-
-                {/* PARTICLE TEXT (SAND) — fond en sortant quand le logo sable part */}
-                {!sandExited && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: exitLeft ? 0 : 1 }}
-                        transition={exitLeft
-                            ? { duration: 0.5, ease: "easeIn" }
-                            : { duration: 1.5, ease: "easeOut", delay: 0.2 }
-                        }
-                        className="absolute inset-0"
-                    >
-                        <ParticleText
-                            lines={["SCALSET"]}
-                            ariaLabel="Scalset"
-                            className="text-[clamp(1.8rem,10vw,5.2rem)] font-bold tracking-[0.2em] md:tracking-[0.75em] uppercase font-(family-name:--font-syncopate)"
-                            yOffset={offsets.text}
-                            explode={shouldExplode}
-                        />
-                    </motion.div>
-                )}
-
-                {/* SCALSET texte statique — même couleur que 100.svg, apparaît avec le logo */}
-                {sandExited && introReady && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1.2, ease: "easeOut" }}
-                        style={{
-                            position: "absolute",
-                            inset: 0,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            pointerEvents: "none",
-                            transform: `translateY(${offsets.text}px)`,
-                        }}
-                    >
-                        {/* wrapper drop-shadow = arêtes champagne, comme stroke du SVG */}
-                        <div className="flex flex-col items-center gap-4 sm:gap-6 md:gap-8">
-                            <div className="animate-metalGlow" style={{
-                                filter: "drop-shadow(0 0 0.4px rgba(214,179,106,0.65)) drop-shadow(0 0 1px rgba(214,179,106,0.25))",
-                            }}>
-                                <span className="metal-shine-text" style={{
-                                    fontFamily: "var(--font-syncopate)",
-                                    fontSize: "clamp(1.1rem, 6.5vw, 4.2rem)",
-                                    fontWeight: 700,
-                                    letterSpacing: "0.20em",
-                                    textTransform: "uppercase",
-                                    whiteSpace: "nowrap",
-                                }}>
-                                    SCALSET
-                                </span>
-                            </div>
-                            <div className="animate-metalGlow" style={{
-                                filter: "drop-shadow(0 0 0.4px rgba(214,179,106,0.4)) drop-shadow(0 0 1px rgba(214,179,106,0.15))",
-                            }}>
-                                <span className="metal-shine-text" style={{
-                                    fontFamily: "var(--font-syncopate)",
-                                    fontSize: "clamp(0.55rem, 2.8vw, 1.5rem)",
-                                    fontWeight: 600,
-                                    letterSpacing: "0.12em",
-                                    textTransform: "uppercase",
-                                    textAlign: "center",
-                                    display: "block",
-                                    lineHeight: 1.6,
-                                    padding: "0 0.5rem",
-                                }}>
-                                    On s&apos;occupe de votre équipe.<br />
-                                    Vous développez votre business.
-                                </span>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-
-                {/* LOGO métallique 100.svg */}
-                {sandExited && introReady && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1.2, ease: "easeOut" }}
-                        className="absolute inset-0 pointer-events-none select-none"
-                    >
-                        <div style={{
-                            position: "absolute",
-                            width: sandLogoSize,
-                            height: sandLogoSize,
-                            top: "50%",
-                            left: "50%",
-                            transform: `translate(-50%, calc(-50% + ${offsets.logo}px + 20px))`,
-                        }}>
-                            <Image src="/100.svg" alt="Scalset Logo" fill draggable={false} className="animate-metalGlow" style={{ objectFit: "contain" }} />
-                        </div>
-                    </motion.div>
-                )}
-
-                {/* PARTICLE LOGO (sable) */}
-                {!sandExited && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1.5, ease: "easeOut" }}
-                        className="absolute inset-0"
-                    >
-                        <ParticleLogo
-                            src="/logo-scalset.svg"
-                            alt="Scalset Logo"
-                            className="w-full h-full"
-                            exitLeft={exitLeft}
-                            onExitLeftComplete={() => setSandExited(true)}
-                            yOffset={offsets.logo + 50}
-                        />
-                    </motion.div>
-                )}
-
-                {/* OVERLAY — déclenche la sortie gauche au clic/tap sur le logo ou l'écriture */}
-                {!exitLeft && !sandExited && (
-                    <div
-                        className="absolute inset-0 z-20 cursor-pointer"
-                        onMouseEnter={() => setExitLeft(true)}
-                        onTouchStart={() => setExitLeft(true)}
+            {/* ═══ SECTION 1 — HERO ═══ */}
+            <section
+                className="relative overflow-hidden bg-black"
+                style={{ height: "100dvh", minHeight: 560 }}
+            >
+                {/* ── BACKGROUND IMAGE ── */}
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                    <Image
+                        src="/images/hero-bg2.png"
+                        alt="Hero background"
+                        fill
+                        priority
+                        className="object-cover object-center"
                     />
-                )}
 
-                {/* LOGO 100.svg — apparaît fixe après la sortie du sable */}
+                    {/* Film grain */}
+                    <div className="film-grain-overlay" />
 
+                    {/* Cadre fumée noire */}
+                    <div style={{
+                        position: "absolute", inset: 0,
+                        background: "radial-gradient(ellipse at 50% 50%, transparent 28%, rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.80) 78%, rgba(0,0,0,0.97) 100%)",
+                    }} />
+                    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.26)" }} />
+                    <div style={{
+                        position: "absolute", top: 0, left: 0, right: 0, height: "18%",
+                        background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%)",
+                    }} />
+                    <div style={{
+                        position: "absolute", bottom: 0, left: 0, right: 0, height: "28%",
+                        background: "linear-gradient(to top, #000 0%, transparent 100%)",
+                    }} />
+                </div>
 
-
-
-                {/* SCROLL */}
+                {/* ── HERO CONTENT ── */}
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{
-                        opacity: shouldExplode ? 0 : 1,
-                    }}
-                    transition={{
-                        delay: 2,
-                        duration: 1,
-                    }}
-                    className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] left-8 flex flex-col items-center gap-2 md:gap-3"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    className="absolute inset-0 z-10 w-full h-full"
                 >
-                    <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-medium">
-                        Scroll
-                    </span>
+                    {/* Logo métallique et Texte - On the Wall */}
+                    <div className="absolute top-[28%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6 animate-metalGlow opacity-90" style={{
+                        filter: "drop-shadow(0 0 30px rgba(212,175,55,0.4))"
+                    }}>
+                        <div className="relative" style={{
+                            width: "clamp(100px, 15vw, 180px)",
+                            height: "clamp(100px, 15vw, 180px)",
+                        }}>
+                            <Image src="/100.svg" alt="Scalset Logo" fill style={{ objectFit: "contain" }} />
+                        </div>
+                        <span className="font-sans tracking-[0.6em] uppercase text-2xl md:text-3xl lg:text-4xl font-light" style={{
+                            background: "linear-gradient(180deg, #ffffff 0%, #eaddc5 100%)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            filter: "drop-shadow(0px 10px 15px rgba(0,0,0,0.8))"
+                        }}>
+                            Scalset
+                        </span>
+                    </div>
 
-                    <div className="relative w-0.5 h-12 bg-white/10 overflow-hidden rounded-full">
+                    {/* Left aligned content block */}
+                    <div className="flex flex-col justify-center h-full w-full max-w-[45%] px-6 sm:px-10 lg:px-20 text-left">
+                        {/* Top tagline retiré à la demande de l'utilisateur */}
 
-                        <motion.div
-                            animate={{
-                                y: ["-100%", "100%"],
-                                opacity: [0, 1, 0],
-                            }}
-                            transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                            }}
-                            className="absolute inset-0 w-full h-1/2 bg-linear-to-b from-transparent via-white/80 to-transparent"
-                        />
+                        {/* Grand titre retiré à la demande de l'utilisateur */}
 
+                        {/* Nouveau Titre Elegant Serif */}
+                        <h1 style={{
+                            fontFamily: "var(--font-cormorant)",
+                            fontWeight: 300,
+                            fontSize: "clamp(2.5rem, 6.5vw, 5.5rem)",
+                            lineHeight: 1.1,
+                            color: "#eaddc5",
+                            letterSpacing: "-0.02em",
+                            filter: "drop-shadow(0px 4px 10px rgba(0,0,0,0.6))"
+                        }}>
+                            Construisez plus grand.<br />
+                            <em style={{ fontStyle: "italic" }}>Exécutez plus vite.</em>
+                        </h1>
+
+                        {/* Sous-titre italic */}
+                        <p style={{
+                            fontFamily: "var(--font-cormorant)",
+                            fontStyle: "italic",
+                            fontSize: "clamp(1rem, 2.2vw, 1.45rem)",
+                            color: "rgba(255,255,255,0.58)",
+                            maxWidth: "44rem",
+                            lineHeight: 1.75,
+                        }} className="mt-5 sm:mt-7">
+                            Nous recrutons, formons et supervisons votre équipe dans nos locaux,
+                            tout en restant pilotée par vous.
+                        </p>
+
+                        {/* CTA Button */}
+                        <div className="mt-8 sm:mt-12 flex flex-col gap-4">
+                            <Link href="/contact" className="group relative px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-all duration-500 bg-black flex items-center justify-center overflow-hidden w-fit" style={{
+                                border: "1px solid rgba(234, 221, 197, 0.7)",
+                                boxShadow: "0 0 15px rgba(234, 221, 197, 0.2)",
+                            }}>
+                                <div className="absolute inset-0 bg-[#eaddc5]/0 group-hover:bg-[#eaddc5]/10 transition-colors duration-500" />
+                                <span className="relative font-sans font-bold text-xs sm:text-sm tracking-wide" style={{
+                                    background: "linear-gradient(180deg, #ffffff 0%, #eaddc5 100%)",
+                                    WebkitBackgroundClip: "text",
+                                    WebkitTextFillColor: "transparent",
+                                    filter: "drop-shadow(0px 3px 5px rgba(0,0,0,0.9))"
+                                }}>
+                                    Nous Contacter
+                                </span>
+                            </Link>
+                            <p style={{
+                                fontFamily: "var(--font-space-grotesk)",
+                                fontSize: "0.6rem",
+                                letterSpacing: "0.38em",
+                                color: "rgba(255,255,255,0.28)",
+                            }} className="uppercase">
+                                Scalset exécute le reste
+                            </p>
+                        </div>
                     </div>
                 </motion.div>
 
-            </section>
-
-            {/* SECTION 2 */}
-            <section className="relative overflow-hidden -mt-10 md:-mt-20" style={{ minHeight: 'max(100dvh, 600px)' }}>
-
-                {/* SUBTITLE & CTA — centré */}
+                {/* Scroll indicator */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-                    className="absolute inset-0 flex flex-col items-center justify-center gap-6 md:gap-10 px-4 sm:px-6 text-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1, duration: 1 }}
+                    className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
                 >
-                    {/* Volumetric Golden Light */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-64 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.30)_0%,transparent_60%)] blur-[30px] pointer-events-none" />
-
-                    <h3
-                        className="relative z-10 max-w-3xl text-[0.85rem] sm:text-[1.05rem] md:text-[1.5rem] lg:text-[2.1rem] font-bold leading-[1.4] tracking-wide px-2 metal-shine-text"
-                        style={{
-                            filter: "drop-shadow(0px 1px 1px rgba(255,255,255,0.3)) drop-shadow(0px 4px 3px rgba(0,0,0,0.8)) drop-shadow(0px 8px 15px rgba(0,0,0,0.9))"
-                        }}
-                    >
-                        Nous recrutons, formons et supervisons<br/>
-                        votre équipe dans nos locaux, tout en<br/>
-                        restant pilotée par vous.
-                    </h3>
-
-                    <SandButton href="/contact">
-                        Nous Contacter
-                    </SandButton>
+                    <div className="relative w-px h-10 overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                        <motion.div
+                            animate={{ y: ["-100%", "100%"], opacity: [0, 1, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute inset-0 w-full h-1/2"
+                            style={{ background: "linear-gradient(to bottom, transparent, rgba(212,175,55,0.7), transparent)" }}
+                        />
+                    </div>
                 </motion.div>
-
             </section>
+
         </>
     );
 }

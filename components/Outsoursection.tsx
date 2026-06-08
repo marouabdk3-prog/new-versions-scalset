@@ -1,174 +1,192 @@
 "use client";
 
-import { motion, Variants } from "framer-motion";
+import { useRef } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
 
-const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: (i: number) => ({
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.7, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] },
-    }),
-};
-
-const fadeLeft: Variants = {
-    hidden: { opacity: 0, x: -40 },
-    visible: (i: number) => ({
-        opacity: 1,
-        x: 0,
-        transition: { duration: 0.7, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] },
-    }),
-};
-
-const fadeRight: Variants = {
-    hidden: { opacity: 0, x: 40 },
-    visible: (i: number) => ({
-        opacity: 1,
-        x: 0,
-        transition: { duration: 0.7, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] },
-    }),
-};
-
-const VIEWPORT = { once: true, amount: 0.2, margin: "0px 0px -80px 0px" };
-
-const stats = [
-    { value: "98%", label: "Taux de satisfaction" },
-    { value: "50%", label: "Gain en productivité" },
-];
-
 export default function Outsoursection() {
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        containerRef.current.style.setProperty('--mouse-x', `${x}px`);
+        containerRef.current.style.setProperty('--mouse-y', `${y}px`);
+    };
+
     return (
         <section
             id="outsourcing"
-            className="relative py-20 px-6 md:px-12 lg:px-20"
+            className="relative w-full h-full flex items-center justify-center overflow-hidden"
         >
-
-            <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_1.4fr_1fr] gap-6 items-start">
-
-                {/* LEFT COLUMN: tall image + stats */}
-                <div className="flex flex-col gap-6">
-                    <motion.div
-                        custom={0}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={VIEWPORT}
-                        variants={fadeLeft}
-                        className="hidden lg:block relative w-full aspect-[3/4] rounded-2xl overflow-hidden ring-1 ring-white/10"
+            <div className="w-full max-w-[1400px] px-8 lg:px-16 flex items-center justify-between h-full">
+                
+                {/* LEFT COLUMN: Metadata / Stats (Lunchlab style) */}
+                <div className="w-[25%] flex flex-col gap-10 text-left">
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        viewport={{ once: true }}
                     >
-                        <Image
-                            src="/talking.jpg"
-                            alt="Équipe SCALSET en action"
-                            fill
-                            sizes="(min-width: 1024px) 25vw, 0px"
-                            className="object-cover"
-                        />
+                        <div className="border border-[#eaddc5] bg-[#0a0a0a] rounded-full px-6 py-2 inline-flex items-center uppercase font-sans tracking-[0.3em] text-[0.65rem]">
+                            <span style={{
+                                color: "#e0e0e0" // Light silver color matching the image
+                            }}>
+                                Outsourcing - Performance
+                            </span>
+                        </div>
                     </motion.div>
 
-                    {/* Stat cards */}
-                    <div className="grid grid-cols-2 gap-6">
-                        {stats.map((stat, i) => (
-                            <motion.div
-                                key={stat.label}
-                                custom={i + 1}
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={VIEWPORT}
-                                variants={fadeLeft}
-                                className="relative flex flex-col gap-1 p-4 rounded-2xl btn-shiny overflow-hidden"
-                            >
-                                {/* bottom silver glow on card */}
-                                <div className="absolute bottom-0 left-0 right-0 h-1/2" />
-                                <span className="text-3xl font-semibold text-slate-100 tracking-tight">
-                                    {stat.value}
-                                </span>
-                                <span className="text-xs text-slate-400 leading-snug">
-                                    {stat.label}
-                                </span>
-                            </motion.div>
-                        ))}
-                    </div>
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                        viewport={{ once: true }}
+                        className="flex flex-col gap-8"
+                    >
+                        {/* Stat 1 */}
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[0.65rem] tracking-[0.25em] text-white/50 uppercase font-sans">
+                                Indicateur
+                            </span>
+                            <span className="text-[0.75rem] tracking-[0.15em] text-white uppercase font-sans">
+                                Taux de satisfaction — 98%
+                            </span>
+                        </div>
+
+                        {/* Stat 2 */}
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[0.65rem] tracking-[0.25em] text-white/50 uppercase font-sans">
+                                Rentabilité
+                            </span>
+                            <span className="text-[0.75rem] tracking-[0.15em] text-white uppercase font-sans">
+                                Gain productivité — 50%
+                            </span>
+                        </div>
+
+                        {/* Lieu */}
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[0.65rem] tracking-[0.25em] text-white/50 uppercase font-sans">
+                                Cadre
+                            </span>
+                            <span className="text-[0.75rem] tracking-[0.15em] text-white uppercase font-sans">
+                                Scalset HQ — Opérations
+                            </span>
+                        </div>
+
+                        {/* Méthode */}
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[0.65rem] tracking-[0.25em] text-white/50 uppercase font-sans">
+                                Approche
+                            </span>
+                            <span className="text-[0.75rem] tracking-[0.15em] text-white uppercase font-sans">
+                                Recrutement & Supervision
+                            </span>
+                        </div>
+                    </motion.div>
                 </div>
 
-                {/* CENTRE COLUMN: heading, text, button, landscape image */}
-                <div className="flex flex-col gap-6 pt-4">
-                    <motion.h2
-                        custom={0}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={VIEWPORT}
-                        variants={fadeUp}
-                        className="text-3xl lg:text-4xl font-semibold leading-tight py-1"
+                {/* CENTER COLUMN: Main Image (Lunchlab style) */}
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    viewport={{ once: true }}
+                    className="w-[45%] flex justify-center items-center"
+                >
+                    <div className="relative w-full max-w-[480px] aspect-square lg:aspect-[4/5] p-3">
+                        {/* Corner Accents */}
+                        <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#eaddc5]/60" />
+                        <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#eaddc5]/60" />
+                        <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-[#eaddc5]/60" />
+                        <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[#eaddc5]/60" />
+                        
+                        {/* Image Container with Spotlight Effect */}
+                        <div 
+                            ref={containerRef}
+                            onMouseMove={handleMouseMove}
+                            className="relative w-full h-full overflow-hidden bg-[#050505] group"
+                            style={{
+                                '--mouse-x': '50%',
+                                '--mouse-y': '50%'
+                            } as React.CSSProperties}
+                        >
+                            {/* Layer 1: Base Dark Image */}
+                            <Image
+                                src="/talking.jpg"
+                                alt="Équipe SCALSET en action"
+                                fill
+                                sizes="(min-width: 1024px) 35vw, 50vw"
+                                className="object-cover opacity-20 grayscale transition-all duration-1000 ease-out group-hover:scale-105"
+                            />
+
+                            {/* Layer 2: Spotlight Reveal */}
+                            <div 
+                                className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                                style={{
+                                    maskImage: "radial-gradient(circle 200px at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)",
+                                    WebkitMaskImage: "radial-gradient(circle 200px at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)",
+                                }}
+                            >
+                                <Image
+                                    src="/talking.jpg"
+                                    alt="Équipe SCALSET en action (Highlight)"
+                                    fill
+                                    sizes="(min-width: 1024px) 35vw, 50vw"
+                                    className="object-cover transition-all duration-1000 ease-out group-hover:scale-105"
+                                    style={{ filter: "contrast(1.1) brightness(1.05)" }}
+                                />
+                            </div>
+
+                            {/* Inner vignette always on top */}
+                            <div className="absolute inset-0 z-20 shadow-[inset_0_0_80px_rgba(0,0,0,0.9)] pointer-events-none" />
+                        </div>
+                        
+                        {/* Bottom Text inside image area */}
+                        <div className="absolute -bottom-10 left-0 right-0 text-center">
+                            <p className="text-[#eaddc5]/50 italic font-serif text-xs">
+                                Scalset — L'excellence opérationnelle
+                            </p>
+                            <p className="text-white/30 text-[0.55rem] tracking-[0.3em] uppercase mt-3">
+                                Découvrez nos talents
+                            </p>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* RIGHT COLUMN: Typography (Lunchlab style) */}
+                <div className="w-[30%] flex flex-col justify-center text-left pl-8">
+                    <motion.h2 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                        viewport={{ once: true }}
+                        className="text-4xl lg:text-5xl font-serif text-[#eaddc5] mb-10 leading-[1.1] tracking-wide"
                     >
-                        <span className="text-slate-100">Vous pouvez faire plus</span>{" "}
-                        <span className="text-slate-300">sans dépenser plus</span>
+                        Vous pouvez faire<br/>plus <span className="italic font-light">sans dépenser<br/>plus.</span>
                     </motion.h2>
 
-                    <motion.p
-                        custom={1}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={VIEWPORT}
-                        variants={fadeUp}
-                        className="text-slate-400 text-base font-bold leading-relaxed max-w-md"
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ duration: 1, delay: 0.5 }}
+                        viewport={{ once: true }}
+                        className="flex flex-col gap-6"
                     >
-                        Ce qui freine votre croissance aujourd&apos;hui, ce n&apos;est pas votre business, mais le coût de vos
-                        équipes. Reprenez le contrôle de votre organisation et améliorez vos résultats en réduisant vos
-                        dépenses.
-                    </motion.p>
+                        <p className="text-[#eaddc5]/80 font-serif italic text-lg leading-relaxed max-w-[90%]">
+                            Ce qui freine votre croissance aujourd'hui, ce n'est pas votre business, mais le coût de vos équipes.
+                        </p>
+                        <p className="text-[#eaddc5]/80 font-serif italic text-lg leading-relaxed max-w-[90%]">
+                            Reprenez le contrôle de votre organisation et améliorez vos résultats en réduisant vos dépenses.
+                        </p>
 
-                    <motion.div
-                        custom={2}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={VIEWPORT}
-                        variants={fadeUp}
-                    >
-                        <motion.a
-                            href="/contact"
-                            whileHover={{ scale: 1.04, boxShadow: "0 0 20px rgba(226,232,240,0.15)" }}
-                            whileTap={{ scale: 0.97 }}
-                            className="btn-shiny transition-all text-lg"
-                        >
-                            Nous contacter
-                        </motion.a>
-                    </motion.div>
-
-                    <motion.div
-                        custom={3}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={VIEWPORT}
-                        variants={fadeUp}
-                        className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden ring-1 ring-white/10"
-                    >
-                        <Image
-                            src="/offices.png"
-                            alt="Équipe en collaboration"
-                            fill
-                            sizes="(min-width: 1024px) 35vw, 100vw"
-                            className="object-cover"
-                        />
+                        {/* Section indicator removed at user's request */}
                     </motion.div>
                 </div>
 
-                {/* RIGHT COLUMN: tall image */}
-                <motion.div
-                    custom={0}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={VIEWPORT}
-                    variants={fadeRight}
-                    className="hidden lg:block relative w-full aspect-[3/4] rounded-2xl overflow-hidden ring-1 ring-white/10 lg:mt-24"
-                >
-                    <Image
-                        src="/hero-img3.png"
-                        alt="Professionnels SCALSET"
-                        fill
-                        sizes="(min-width: 1024px) 25vw, 0px"
-                        className="object-cover"
-                    />
-                </motion.div>
             </div>
         </section>
     );

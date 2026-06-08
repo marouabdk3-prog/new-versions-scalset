@@ -8,14 +8,8 @@ export default function Footer() {
 
                 {/* Brand Column */}
                 <div className="flex flex-col gap-6 lg:col-span-2">
-                    <Link href="/" className="relative block w-28 sm:w-36 md:w-44 lg:w-[200px] h-10 sm:h-12 lg:h-[50px] flex-shrink-0 overflow-hidden">
-                        <Image
-                            src="/SCALSET-1.ico"
-                            alt="ScalSet Logo"
-                            fill
-                            sizes="(min-width: 1024px) 200px, (min-width: 640px) 144px, 112px"
-                            className="object-contain object-left scale-[2.2] origin-left"
-                        />
+                    <Link href="/" className="inline-block flex-shrink-0">
+                        <span className="text-2xl font-bold tracking-[0.2em] text-white">SCALSET</span>
                     </Link>
                     <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
                         Partenaire d&apos;exécution opérationnelle. Nous permettons aux entreprises de croître en déléguant l&apos;opérationnel quotidien.
