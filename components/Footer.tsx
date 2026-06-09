@@ -1,50 +1,175 @@
+"use client";
+
 import Link from "next/link";
-import Image from "next/image";
 
 export default function Footer() {
+    const year = new Date().getFullYear();
+
     return (
-        <footer className="py-20 px-6 md:px-12 lg:px-20 border-t border-white/5" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent)" }}>
-            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <footer style={{
+            background: "#030303",
+            borderTop: "1px solid rgba(212,175,55,0.12)",
+            fontFamily: "var(--font-montserrat), sans-serif",
+            color: "#fff",
+        }}>
+            <div style={{
+                maxWidth: 1200,
+                margin: "0 auto",
+                padding: "80px 40px 40px",
+            }}>
 
-                {/* Brand Column */}
-                <div className="flex flex-col gap-6 lg:col-span-2">
-                    <Link href="/" className="inline-block flex-shrink-0">
-                        <span className="text-2xl font-bold tracking-[0.2em] text-white">SCALSET</span>
-                    </Link>
-                    <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
-                        Partenaire d&apos;exécution opérationnelle. Nous permettons aux entreprises de croître en déléguant l&apos;opérationnel quotidien.
+                {/* ── TOP ROW ── */}
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "2fr 1fr 1fr",
+                    gap: 60,
+                    marginBottom: 64,
+                }}>
+
+                    {/* Brand */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                        <Link href="/" style={{ textDecoration: "none" }}>
+                            <span style={{
+                                fontSize: "1.6rem",
+                                fontWeight: 800,
+                                letterSpacing: "0.15em",
+                                background: "linear-gradient(135deg, #fff 40%, #d4af37 100%)",
+                                WebkitBackgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                                backgroundClip: "text",
+                            }}>
+                                SCALSET
+                            </span>
+                        </Link>
+                        <p style={{
+                            color: "rgba(255,255,255,0.38)",
+                            fontSize: "0.9rem",
+                            lineHeight: 1.8,
+                            maxWidth: 340,
+                            margin: 0,
+                        }}>
+                            Partenaire d&apos;exécution opérationnelle. Nous permettons aux entreprises de croître en déléguant l&apos;opérationnel quotidien.
+                        </p>
+                        <Link href="/contact" style={{
+                            display: "inline-block",
+                            marginTop: 8,
+                            padding: "12px 28px",
+                            borderRadius: 9999,
+                            border: "1px solid rgba(212,175,55,0.4)",
+                            color: "#d4af37",
+                            fontSize: "0.72rem",
+                            fontWeight: 700,
+                            letterSpacing: "0.18em",
+                            textTransform: "uppercase",
+                            textDecoration: "none",
+                            width: "fit-content",
+                            transition: "background 0.3s, color 0.3s",
+                        }}
+                            onMouseEnter={e => {
+                                (e.currentTarget as HTMLElement).style.background = "#d4af37";
+                                (e.currentTarget as HTMLElement).style.color = "#000";
+                            }}
+                            onMouseLeave={e => {
+                                (e.currentTarget as HTMLElement).style.background = "transparent";
+                                (e.currentTarget as HTMLElement).style.color = "#d4af37";
+                            }}
+                        >
+                            Démarrer un projet
+                        </Link>
+                    </div>
+
+                    {/* Navigation */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                        <h4 style={{
+                            fontSize: "0.68rem",
+                            fontWeight: 700,
+                            letterSpacing: "0.25em",
+                            textTransform: "uppercase",
+                            color: "rgba(255,255,255,0.3)",
+                            margin: "0 0 8px",
+                        }}>Navigation</h4>
+                        {[
+                            { label: "Accueil", href: "/" },
+                            { label: "À propos", href: "/a-propos" },
+                            { label: "Services", href: "/services" },
+                            { label: "Contact", href: "/contact" },
+                        ].map(({ label, href }) => (
+                            <Link key={href} href={href} style={{
+                                color: "rgba(255,255,255,0.5)",
+                                fontSize: "0.92rem",
+                                textDecoration: "none",
+                                transition: "color 0.25s",
+                                width: "fit-content",
+                            }}
+                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#d4af37"}
+                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)"}
+                            >
+                                {label}
+                            </Link>
+                        ))}
+                    </div>
+
+                    {/* Contact Info */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                        <h4 style={{
+                            fontSize: "0.68rem",
+                            fontWeight: 700,
+                            letterSpacing: "0.25em",
+                            textTransform: "uppercase",
+                            color: "rgba(255,255,255,0.3)",
+                            margin: "0 0 8px",
+                        }}>Contact</h4>
+                        <a href="mailto:contact@scalset.com" style={{
+                            color: "rgba(255,255,255,0.5)",
+                            fontSize: "0.92rem",
+                            textDecoration: "none",
+                            transition: "color 0.25s",
+                        }}
+                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#fff"}
+                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)"}
+                        >
+                            contact@scalset.com
+                        </a>
+                        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.92rem", margin: 0 }}>+971 56 284 16 93</p>
+                        <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.85rem", margin: 0, lineHeight: 1.6 }}>Dubaï Silicon Oasis<br />Émirats Arabes Unis</p>
+                    </div>
+
+                </div>
+
+                {/* ── BOTTOM ROW ── */}
+                <div style={{
+                    borderTop: "1px solid rgba(255,255,255,0.06)",
+                    paddingTop: 32,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: 16,
+                }}>
+                    <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.78rem", letterSpacing: "0.08em", margin: 0 }}>
+                        © {year} SCALSET. Tous droits réservés.
                     </p>
+                    <div style={{ display: "flex", gap: 28 }}>
+                        {[
+                            { label: "Mentions légales", href: "/mentions-legales" },
+                            { label: "Confidentialité", href: "/confidentialite" },
+                        ].map(({ label, href }) => (
+                            <Link key={href} href={href} style={{
+                                color: "rgba(255,255,255,0.2)",
+                                fontSize: "0.78rem",
+                                textDecoration: "none",
+                                letterSpacing: "0.05em",
+                                transition: "color 0.25s",
+                            }}
+                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#d4af37"}
+                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.2)"}
+                            >
+                                {label}
+                            </Link>
+                        ))}
+                    </div>
                 </div>
 
-                {/* Navigation */}
-                <div className="flex flex-col gap-4">
-                    <h4 className="text-white font-bold tracking-tight">Navigation</h4>
-                    <nav className="flex flex-col gap-2">
-                        <Link href="/" className="text-slate-400 hover:text-white text-sm transition-colors">Accueil</Link>
-                        <Link href="/a-propos" className="text-slate-400 hover:text-white text-sm transition-colors">À propos</Link>
-                        <Link href="/services" className="text-slate-400 hover:text-white text-sm transition-colors">Services</Link>
-                    </nav>
-                </div>
-
-                {/* Contact/Action */}
-                <div className="flex flex-col gap-4">
-                    <h4 className="text-white font-bold tracking-tight">Contact</h4>
-                    <p className="text-slate-400 text-sm">Prêt à faire passer votre entreprise au niveau supérieur ?</p>
-                    <Link href="/contact" className="text-slate-100 hover:text-white text-sm font-bold underline decoration-slate-400 decoration-2 underline-offset-4 transition-all">
-                        Démarrer un projet
-                    </Link>
-                </div>
-
-            </div>
-
-            <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p className="text-slate-500 text-xs">
-                    © {new Date().getFullYear()} SCALSET. Tous droits réservés.
-                </p>
-                <div className="flex gap-6">
-                    <Link href="/mentions-legales" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">Mentions légales</Link>
-                    <Link href="/confidentialite" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">Confidentialité</Link>
-                </div>
             </div>
         </footer>
     );

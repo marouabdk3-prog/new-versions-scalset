@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Syncopate, Cormorant_Garamond } from "next/font/google";
+import { Space_Grotesk, Syncopate, Cormorant_Garamond, Montserrat } from "next/font/google";
 import "./globals.css";
+import "./ssprismatic.css";
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+});
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -36,6 +43,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LogoAnimationProvider } from "@/components/LogoAnimationContext";
 import MercuryIntro from "@/components/MercuryIntro";
+import SSPrismaticCursor from "@/components/SSPrismaticCursor";
+import GoldenDnaBackground from "@/components/GoldenDnaBackground";
 
 export default function RootLayout({
   children,
@@ -44,7 +53,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className="dark max-[480px]:overflow-x-hidden">
-      <body className={`${spaceGrotesk.variable} ${syncopate.variable} ${cormorant.variable} antialiased text-[#F8FAFC] relative min-h-screen overflow-x-hidden`}>
+      <body className={`${montserrat.variable} ${spaceGrotesk.variable} ${syncopate.variable} ${cormorant.variable} antialiased text-[#F8FAFC] relative min-h-screen overflow-x-hidden`}>
+        <SSPrismaticCursor />
+        <GoldenDnaBackground />
+        
         {/* Intro overlay sits above everything; real site is behind it */}
         <MercuryIntro />
         <LogoAnimationProvider>

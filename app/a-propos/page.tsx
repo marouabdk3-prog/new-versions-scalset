@@ -1,313 +1,250 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
-const cards = [
-    {
-        title: "Payez moins, gagnez plus",
-        content: "Un coût d’exécution réduit avec de meilleures performances. Vous gardccez un haut niveau d’efficacité sans supporter les charges locales.",
-        points: ["Coûts maîtrisés", "Rentabilité", "Scalabilité"]
-    },
-    {
-        title: "Du concret, pas des promesses",
-        content: "Un travail sérieux, structuré et suivi au quotidien. Des équipes encadrées qui exécutent proprement, sans erreur.",
-        points: ["Rigueur", "Suivi", "Fiabilité"]
-    },
-    {
-        title: "Collaborer en toute confiance",
-        content: "Aucune fuite, aucune exposition : votre activité reste sécurisée. Vos données, vos process et votre organisation restent totalement protégés.",
-        points: ["Confidentialité", "Sécurité", "Discrétion"]
-    }
-];
+export default function AboutPage() {
+    const lineRef = useRef<HTMLDivElement>(null);
 
-import OrganizationChart from "@/components/OrganizationChart";
-
-const missionPhotos = ["/01.jpeg", "/02.jpeg", "/03.jpeg"];
-
-function MissionCard() {
-    const [revealed, setRevealed] = useState(false);
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("animate-in");
+                    }
+                });
+            },
+            { threshold: 0.15 }
+        );
+        document.querySelectorAll(".fade-up").forEach((el) => observer.observe(el));
+        return () => observer.disconnect();
+    }, []);
 
     return (
-        <section className="py-16 lg:py-24">
-            <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-center">
+        <>
+            <style>{`
+                .fade-up {
+                    opacity: 0;
+                    transform: translateY(32px);
+                    transition: opacity 0.8s cubic-bezier(.22,1,.36,1), transform 0.8s cubic-bezier(.22,1,.36,1);
+                }
+                .fade-up.animate-in {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                .delay-1 { transition-delay: 0.1s; }
+                .delay-2 { transition-delay: 0.2s; }
+                .delay-3 { transition-delay: 0.3s; }
+                .delay-4 { transition-delay: 0.4s; }
+                .gold-border-card {
+                    border: 1px solid rgba(212,175,55,0.0);
+                    transition: border-color 0.4s, transform 0.4s;
+                }
+                .gold-border-card:hover {
+                    border-color: rgba(212,175,55,0.35);
+                    transform: translateY(-6px);
+                }
+            `}</style>
 
-                {/* LEFT: Text Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="lg:w-1/2 w-full relative rounded-3xl p-8 md:p-12 flex flex-col gap-7 overflow-hidden"
-                    style={{
-                        background: "rgba(6,6,12,0.75)",
-                        backdropFilter: "blur(24px)",
-                        WebkitBackdropFilter: "blur(24px)",
-                        border: "1px solid rgba(212,175,55,0.18)",
-                        boxShadow: "0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.12)",
-                    }}
-                >
-                    {/* Gold top highlight */}
-                    <div className="absolute inset-x-0 top-0 h-px pointer-events-none"
-                        style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)" }} />
+            <main style={{ background: "#030303", color: "#fff", fontFamily: "var(--font-montserrat), sans-serif" }}>
 
-                    <span className="text-xs font-bold uppercase tracking-[0.25em]" style={{ color: "#d4af37" }}>
-                        Notre Mission
-                    </span>
-
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] tracking-tight">
-                        L&apos;ambition<br />qui nous{" "}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 to-slate-500 italic pr-1">
-                            définit.
-                        </span>
-                    </h2>
-
-                    <p className="text-slate-300 text-base md:text-lg leading-relaxed max-w-md">
-                        Chez SCALSET, notre ambition est simple : vous permettre de réussir avec les bons outils et les bonnes personnes. Nous veillons à offrir à nos équipes des conditions de travail sérieuses et valorisantes, pour vous apporter une vraie stabilité sur le long terme.
-                    </p>
-
-                    <div className="w-12 h-px" style={{ background: "rgba(212,175,55,0.4)" }} />
-
-                    <div className="flex gap-10">
-                        {[["100%", "Dédiés"], ["24/7", "Disponibles"], ["0%", "Compromis"]].map(([val, label]) => (
-                            <div key={label}>
-                                <p className="text-2xl font-black text-white">{val}</p>
-                                <p className="text-xs uppercase tracking-widest text-slate-500 mt-1">{label}</p>
-                            </div>
-                        ))}
-                    </div>
-                </motion.div>
-
-                {/* RIGHT: Floating Photos */}
-                <div
-                    className="lg:w-1/2 w-full"
-                    onMouseEnter={() => setRevealed(true)}
-                    onMouseLeave={() => setRevealed(false)}
-                    onTouchStart={() => setRevealed(true)}
-                >
-                    {/* Mobile: simple grid */}
-                    <div className="grid grid-cols-3 gap-3 lg:hidden">
-                        {missionPhotos.map((src, i) => (
-                            <motion.div
-                                key={i}
-                                animate={revealed ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-                                transition={{ delay: revealed ? i * 0.18 : (2 - i) * 0.08, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                                className="relative rounded-xl overflow-hidden aspect-[3/4]"
-                                style={{ boxShadow: "0 10px 30px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}
-                            >
-                                <Image src={src} alt={`ScalSet ${i + 1}`} fill className="object-cover" sizes="30vw" />
-                            </motion.div>
-                        ))}
+                {/* ── HERO ─────────────────────────────────── */}
+                <section style={{
+                    minHeight: "100vh",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    padding: "160px 24px 100px",
+                    position: "relative",
+                    overflow: "hidden",
+                }}>
+                    {/* glow */}
+                    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+                        <div style={{ position: "absolute", top: "-10%", left: "50%", transform: "translateX(-50%)", width: "60vw", height: "60vw", background: "radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%)", borderRadius: "50%", filter: "blur(60px)" }}></div>
                     </div>
 
-                    {/* Desktop: cascading stacked cards */}
-                    <div className="hidden lg:block relative" style={{ height: 420 }}>
-                        {missionPhotos.map((src, i) => {
-                            const configs = [
-                                { top: 0,   left: "0%",  width: "68%", rotate: "-3deg", zIndex: 3 },
-                                { top: 50,  left: "16%", width: "68%", rotate: "0deg",  zIndex: 2 },
-                                { top: 100, left: "32%", width: "68%", rotate: "3deg",  zIndex: 1 },
-                            ];
-                            const c = configs[i];
-                            return (
-                                <motion.div
-                                    key={i}
-                                    animate={revealed ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
-                                    transition={{ delay: revealed ? i * 0.2 : (2 - i) * 0.08, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-                                    className="absolute rounded-2xl overflow-hidden"
-                                    style={{
-                                        top: c.top,
-                                        left: c.left,
-                                        width: c.width,
-                                        aspectRatio: "4/3",
-                                        transform: `rotate(${c.rotate})`,
-                                        zIndex: c.zIndex,
-                                        boxShadow: "0 24px 60px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.07)",
-                                    }}
-                                >
-                                    <Image src={src} alt={`ScalSet ${i + 1}`} fill className="object-cover" sizes="40vw" />
-                                    <div className="absolute inset-0 pointer-events-none"
-                                        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%, rgba(0,0,0,0.18) 100%)" }} />
-                                </motion.div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-            </div>
-        </section>
-    );
-}
-
-function ElevatedConclusion() {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const [isHovered, setIsHovered] = useState(false);
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-        const { left, top } = e.currentTarget.getBoundingClientRect();
-        setMousePosition({ x: e.clientX - left, y: e.clientY - top });
-    };
-
-    return (
-        <section
-            onMouseMove={handleMouseMove}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            className="relative mt-12 sm:mt-20 min-h-[40vh] flex flex-col items-center justify-center text-center px-4 rounded-4xl sm:rounded-[3rem] border-2 border-slate-200/30 shadow-[0_0_40px_rgba(226,232,240,0.08)] overflow-hidden group"
-        >
-            <div className="absolute inset-0 bg-[#0d0d14]" />
-
-            {/* Base static glow from bottom */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_150%,rgba(148,163,184,0.15)_0%,transparent_60%)] group-hover:opacity-0 transition-opacity duration-1000" />
-
-            {/* Hover cursor glow effect */}
-            <div
-                className="absolute inset-0 pointer-events-none transition-opacity duration-500 ease-out"
-                style={{
-                    background: `radial-gradient(circle 140px at ${mousePosition.x}px ${mousePosition.y}px, rgba(226,232,240,0.15), transparent 40%)`,
-                    opacity: isHovered ? 1 : 0
-                }}
-            
-            />
-
-            <div className="relative z-10 flex flex-col items-center gap-10">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.1]">
-                    Arrêtez de payer trop cher<br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-slate-100 to-slate-400 italic pr-2">
-                        pour exécuter
-                    </span>
-                </h2>
-                <motion.a
-                    href="/contact"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="btn-shiny px-10 py-5 text-lg rounded-2xl"
-                >
-                    Démarrer la collaboration
-                </motion.a>
-            </div>
-        </section>
-    );
-}
-
-export default function APropos() {
-    return (
-        <main className="min-h-screen relative overflow-clip selection:bg-slate-300/20">
-            {/* Ambient Background Glows tailored for this page */}
-            <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-slate-400/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
-            <div className="absolute top-[40%] left-0 w-[40vw] h-[40vw] bg-slate-200/5 blur-[150px] rounded-full pointer-events-none -translate-x-1/2" />
-
-            <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pb-24">
-
-                {/* 1. HERO */}
-                <section className="relative h-[90vh] flex flex-col items-center justify-center text-center">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 50, filter: "blur(20px)" }}
-                        animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                        className="flex flex-col items-center gap-8"
-                    >
-                        <div className="relative inline-flex items-center justify-center">
-                            <div className="absolute inset-0 rounded-[999px] bg-[#d4af37]/30 blur-xl pointer-events-none" />
-                            <div
-                                className="relative rounded-[999px] p-[2px] shadow-[0_10px_30px_rgba(212,175,55,0.4)]"
-                                style={{ background: "linear-gradient(180deg, #ffffff 0%, #a3a3a3 20%, #4d4d4d 50%, #d4af37 80%, #ffdf73 100%)" }}
-                            >
-                                <div className="relative px-6 py-2.5 flex items-center justify-center rounded-[999px] bg-gradient-to-b from-black/80 to-[#1a1a1a] backdrop-blur-md">
-                                    <div className="absolute inset-0 rounded-[999px] shadow-[inset_0_1px_2px_rgba(255,255,255,0.2),inset_0_-1px_3px_rgba(212,175,55,0.3)] pointer-events-none" />
-                                    <span
-                                        className="relative z-10 text-xs lg:text-sm font-bold tracking-[0.2em] uppercase"
-                                        style={{
-                                            background: "linear-gradient(180deg, #ffffff 0%, #a3a3a3 25%, #4d4d4d 45%, #2b2b2b 50%, #8c8c8c 55%, #e6e6e6 80%, #d4af37 100%)",
-                                            WebkitBackgroundClip: "text",
-                                            backgroundClip: "text",
-                                            color: "transparent",
-                                        }}
-                                    >
-                                        ScalSet Identity
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[8.5rem] font-black tracking-tighter text-transparent bg-clip-text bg-linear-to-b from-[#F8FAFC] via-[#E2E8F0] to-[#64748B] leading-[0.9] pb-4 drop-shadow-2xl">
-                            L&apos;Exécution<br />Comme Art.
-                        </h1>
-                        <p className="text-[#d8d8d8] text-base sm:text-lg md:text-xl lg:text-2xl max-w-3xl font-bold leading-relaxed">
-                            Notre expertise en outsourcing nous permet de fournir à des structures la possibilité d’être parmi
-                            les plus compétitives et les plus efficaces sur le marché mondial.
+                    <div style={{ maxWidth: 900, margin: "0 auto", position: "relative", zIndex: 1 }}>
+                        <p className="fade-up" style={{ color: "#d4af37", fontSize: 11, fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 32 }}>
+                            — À propos de ScalSet —
                         </p>
-                    </motion.div>
-
-
+                        <h1 className="fade-up delay-1" style={{ fontSize: "clamp(3rem, 8vw, 7rem)", fontWeight: 900, lineHeight: 0.92, letterSpacing: "-0.03em", textTransform: "uppercase", margin: "0 0 40px" }}>
+                            L'exécution<br />
+                            <span style={{ WebkitTextFillColor: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.3)" }}>
+                                comme art.
+                            </span>
+                        </h1>
+                        <p className="fade-up delay-2" style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)", color: "rgba(255,255,255,0.5)", fontWeight: 300, lineHeight: 1.8, maxWidth: 600, margin: "0 auto" }}>
+                            Notre ambition est simple : vous permettre de réussir avec les bons outils et les bonnes personnes. La croissance devient maîtrisée.
+                        </p>
+                    </div>
                 </section>
 
-                {/* 2. MISSION BLOG CARD */}
-                <MissionCard />
+                {/* ── STATS ─────────────────────────────────── */}
+                <section style={{ padding: "80px 24px", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ maxWidth: 960, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 48, textAlign: "center" }}>
+                        {[
+                            { val: "100%", label: "Dédiés à votre succès" },
+                            { val: "24/7", label: "Disponibilité totale" },
+                            { val: "0%", label: "De compromis" },
+                        ].map((s, i) => (
+                            <div key={i} className="fade-up" style={{ transitionDelay: `${i * 0.12}s` }}>
+                                <p style={{ fontSize: "clamp(3rem, 6vw, 5rem)", fontWeight: 900, lineHeight: 1, color: "#d4af37", margin: "0 0 12px" }}>{s.val}</p>
+                                <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>{s.label}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
-
-                {/* 3. STICKY STACKING CARDS (THE METHODOLOGY) */}
-                <section className="py-24 relative lg:min-h-[150vh]">
-                    <div className="flex flex-col lg:flex-row gap-16 lg:gap-8 items-start relative">
-                        {/* Sticky Text Side */}
-                        <div className="lg:w-5/12 lg:sticky lg:top-32 flex flex-col gap-8 z-10">
-                            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-none">
-                                Notre <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 to-slate-600 font-black italic pr-4">ADN</span>
+                {/* ── MISSION ─────────────────────────────────── */}
+                <section style={{ padding: "120px 24px" }}>
+                    <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 80, alignItems: "center" }}>
+                        <div className="fade-up">
+                            <p style={{ color: "#d4af37", fontSize: 11, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 24 }}>Notre mission</p>
+                            <h2 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 900, letterSpacing: "-0.03em", textTransform: "uppercase", lineHeight: 1.05, margin: "0 0 32px" }}>
+                                Votre succès,<br /><span style={{ color: "#d4af37" }}>notre raison d'être.</span>
                             </h2>
-                            <p className="text-lg lg:text-xl text-slate-400 leading-relaxed max-w-md">
-                                Notre ADN chez ScalSet repose sur trois piliers. Cela nous permet de nous démarquer sur le
-                                marché et d&apos;accompagner efficacement les entreprises qui veulent aller plus loin, se structurer et
-                                développer une activité solide.
+                            <p style={{ color: "rgba(255,255,255,0.5)", lineHeight: 1.9, fontSize: "1.05rem", marginBottom: 20 }}>
+                                Nous veillons à offrir à nos équipes des conditions de travail sérieuses et valorisantes, pour vous apporter une vraie stabilité sur le long terme.
                             </p>
-                            {/* Invisible spacer to synchronize unsticking with the right cards (matches sticky bottom bounds) */}
-                            <div className="hidden lg:block h-[260px] pointer-events-none" />
+                            <p style={{ color: "rgba(255,255,255,0.5)", lineHeight: 1.9, fontSize: "1.05rem" }}>
+                                Aucune fuite, aucune exposition. Vos données, vos process et votre organisation restent strictement protégés.
+                            </p>
+                        </div>
+                        <div className="fade-up delay-2" style={{ display: "flex", justifyContent: "center" }}>
+                            <div style={{
+                                width: "min(400px, 100%)",
+                                aspectRatio: "1",
+                                borderRadius: 32,
+                                border: "1px solid rgba(212,175,55,0.15)",
+                                background: "rgba(212,175,55,0.02)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                position: "relative",
+                                overflow: "hidden",
+                            }}>
+                                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 70% 30%, rgba(212,175,55,0.08), transparent 60%)" }}></div>
+                                <Image src="/100.svg" alt="ScalSet" width={160} height={160} style={{ position: "relative", zIndex: 1, filter: "drop-shadow(0 0 40px rgba(212,175,55,0.3))" }} />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ── ADN ─────────────────────────────────── */}
+                <section style={{ padding: "120px 24px", borderTop: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+                    <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+                        <div className="fade-up" style={{ textAlign: "center", marginBottom: 72 }}>
+                            <h2 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 900, letterSpacing: "-0.03em", textTransform: "uppercase", margin: "0 0 16px" }}>Notre ADN</h2>
+                            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "1.1rem", maxWidth: 560, margin: "0 auto", lineHeight: 1.7 }}>
+                                Les trois piliers qui soutiennent notre excellence opérationnelle.
+                            </p>
                         </div>
 
-                        {/* Stacking Cards Side */}
-                        <div className="lg:w-7/12 relative flex flex-col gap-8 w-full mt-12 lg:mt-0 lg:pb-12">
-                            {cards.map((card, index) => (
-                                <div
-                                    key={index}
-                                    className="lg:sticky w-full transition-all duration-500"
-                                    style={{
-                                        top: `${140 + (index * 50)}px`,   // Each card stops 130px lower than the previous one
-                                        zIndex: 20 + index
-                                    }}
-                                >
-                                    <div className="bg-[#11111B]/90 backdrop-blur-2xl border-2 border-slate-200/30 rounded-[2rem] p-8 md:p-12 shadow-[0_0_30px_rgba(0,0,0,0.6)] flex flex-col gap-8 origin-top group hover:border-slate-200/50 hover:shadow-[0_0_30px_rgba(226,232,240,0.1)] transition-all duration-500 glass-panel">
-                                        <div className="flex items-center gap-6">
-                                            <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20 select-none">
-                                                0{index + 1}
-                                            </span>
-                                            <h3 className="text-2xl md:text-3xl font-bold text-slate-100 tracking-tight">
-                                                {card.title}
-                                            </h3>
-                                        </div>
-                                        <p className="text-slate-400 leading-relaxed text-lg">
-                                            {card.content}
-                                        </p>
-                                        <div className="flex flex-wrap gap-3 pt-4 border-t border-white/5">
-                                            {card.points.map((pt, i) => (
-                                                <span key={i} className="px-4 py-2 rounded-full bg-white/5 border border-slate-300/10 text-[13px] font-medium text-slate-300 group-hover:bg-white/10 group-hover:text-white transition-all duration-300">
-                                                    {pt}
-                                                </span>
-                                            ))}
-                                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
+                            {[
+                                { num: "01", title: "Rentabilité", desc: "Payez moins, gagnez plus. Un coût d'exécution réduit avec de meilleures performances, sans sacrifier la qualité." },
+                                { num: "02", title: "Concret", desc: "Pas de promesses en l'air. Un travail structuré et suivi au quotidien par des équipes encadrées qui exécutent proprement." },
+                                { num: "03", title: "Confiance", desc: "Collaborer en toute sérénité. Vos process et votre organisation sont strictement protégés, à chaque instant." },
+                            ].map((item, i) => (
+                                <div key={i} className={`fade-up gold-border-card delay-${i + 1}`} style={{
+                                    padding: "48px 40px",
+                                    borderRadius: 24,
+                                    background: "#0a0a0a",
+                                    border: "1px solid rgba(255,255,255,0.07)",
+                                    cursor: "default",
+                                }}>
+                                    <span style={{ display: "block", fontSize: "3.5rem", fontWeight: 900, color: "rgba(212,175,55,0.15)", lineHeight: 1, marginBottom: 24 }}>{item.num}</span>
+                                    <h3 style={{ fontSize: "1.6rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 16 }}>{item.title}</h3>
+                                    <p style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.8, fontSize: "1rem" }}>{item.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* ── ORGANISATION ─────────────────────────────────── */}
+                <section style={{ padding: "120px 24px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ maxWidth: 800, margin: "0 auto" }}>
+                        <div className="fade-up" style={{ textAlign: "center", marginBottom: 80 }}>
+                            <h2 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 900, letterSpacing: "-0.03em", textTransform: "uppercase", margin: "0 0 16px" }}>L'organisation</h2>
+                            <p style={{ color: "#d4af37", fontSize: 12, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase" }}>Pensée pour performer</p>
+                        </div>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                            {[
+                                { num: "01", label: "Le Client (Vous)", desc: "Vous définissez les objectifs, validez les profils et restez le pilote incontesté de votre croissance.", gold: false },
+                                { num: "02", label: "SCALSET", desc: "Chef d'orchestre. Nous recrutons, formons et supervisons l'ensemble des opérations en temps réel.", gold: true },
+                                { num: "03", label: "Le Manager Dédié", desc: "Votre relais sur le terrain. Il encadre les équipes dans nos locaux, garantit les KPI et vous reporte chaque jour.", gold: false },
+                                { num: "04", label: "L'équipe Opérationnelle", desc: "Closers, Setters, Copywriters, Designers, Support… Des experts formés, prêts à exécuter sans friction.", gold: false },
+                            ].map((step, i) => (
+                                <div key={i} className={`fade-up delay-${i + 1}`} style={{
+                                    display: "flex",
+                                    alignItems: "flex-start",
+                                    gap: 28,
+                                    padding: "36px 40px",
+                                    borderRadius: 20,
+                                    background: step.gold ? "rgba(212,175,55,0.06)" : "rgba(255,255,255,0.02)",
+                                    border: `1px solid ${step.gold ? "rgba(212,175,55,0.25)" : "rgba(255,255,255,0.06)"}`,
+                                }}>
+                                    <div style={{
+                                        width: 52,
+                                        height: 52,
+                                        borderRadius: "50%",
+                                        border: `2px solid ${step.gold ? "#d4af37" : "rgba(255,255,255,0.15)"}`,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.8rem",
+                                        fontWeight: 900,
+                                        color: step.gold ? "#d4af37" : "rgba(255,255,255,0.4)",
+                                        flexShrink: 0,
+                                        marginTop: 4,
+                                    }}>{step.num}</div>
+                                    <div>
+                                        <h3 style={{ fontSize: "1.25rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8, color: step.gold ? "#d4af37" : "#fff" }}>{step.label}</h3>
+                                        <p style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.7, fontSize: "0.95rem", margin: 0 }}>{step.desc}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </section>
-            </div>
 
-            <OrganizationChart />
+                {/* ── CTA ─────────────────────────────────── */}
+                <section style={{ padding: "120px 24px", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.05)", background: "radial-gradient(ellipse at 50% 100%, rgba(212,175,55,0.06) 0%, transparent 70%)" }}>
+                    <div className="fade-up" style={{ maxWidth: 700, margin: "0 auto" }}>
+                        <h2 style={{ fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 900, letterSpacing: "-0.03em", textTransform: "uppercase", lineHeight: 1, margin: "0 0 24px" }}>
+                            Prêt à dominer<br />votre marché ?
+                        </h2>
+                        <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "1.1rem", lineHeight: 1.7, marginBottom: 48 }}>
+                            Laissez-nous gérer l'exécution. Concentrez-vous sur la vision.
+                        </p>
+                        <Link href="/contact" style={{
+                            display: "inline-block",
+                            padding: "18px 48px",
+                            borderRadius: 9999,
+                            background: "#d4af37",
+                            color: "#000",
+                            fontWeight: 800,
+                            fontSize: "0.85rem",
+                            letterSpacing: "0.2em",
+                            textTransform: "uppercase",
+                            textDecoration: "none",
+                            transition: "background 0.3s, transform 0.3s",
+                        }}
+                            onMouseEnter={e => { (e.target as HTMLElement).style.background = "#fff"; (e.target as HTMLElement).style.transform = "scale(1.04)"; }}
+                            onMouseLeave={e => { (e.target as HTMLElement).style.background = "#d4af37"; (e.target as HTMLElement).style.transform = "scale(1)"; }}
+                        >
+                            Lancer une collaboration
+                        </Link>
+                    </div>
+                </section>
 
-            <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pb-24">
-                {/* 5. ELEVATED CONCLUSION */}
-                <ElevatedConclusion />
-
-            </div>
-        </main>
+            </main>
+        </>
     );
 }

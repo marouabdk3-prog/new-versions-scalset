@@ -1,194 +1,180 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, MessageSquare, Send } from "lucide-react";
-import type { FormEvent } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const WHATSAPP_NUMBER = "971541771844"; // À remplacer par le numéro réel de l'entreprise
-
-const CATEGORIES = [
-    { label: "Besoin de renfort", defaultText: "Bonjour, j'aimerais avoir plus d'informations sur vos services pour renforcer mon équipe." },
-    { label: "Rejoindre l'équipe", defaultText: "Bonjour, je souhaite postuler pour rejoindre les équipes SCALSET." },
-    { label: "Partenariat", defaultText: "Bonjour, j'aimerais discuter d'une opportunité de partenariat." },
-    { label: "Autre", defaultText: "Bonjour, j'ai une demande spécifique à vous soumettre." }
+const contactMethods = [
+    {
+        icon: (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+                <circle cx="12" cy="10" r="3" />
+            </svg>
+        ),
+        label: "Siège Social",
+        value: "Dubaï Silicon Oasis, UAE",
+        href: null,
+    },
+    {
+        icon: (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+            </svg>
+        ),
+        label: "Email",
+        value: "contact@scalset.com",
+        href: "mailto:contact@scalset.com",
+    },
+    {
+        icon: (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+        ),
+        label: "WhatsApp Business",
+        value: "+971 56 284 16 93",
+        href: "https://wa.me/971562841693",
+        green: true,
+    },
 ];
 
 export default function ContactPage() {
-    const [name, setName] = useState("");
-    const [subject, setSubject] = useState(CATEGORIES[0].label);
-    const [message, setMessage] = useState(CATEGORIES[0].defaultText);
+    const [category, setCategory] = useState("Besoin de renfort");
 
-    const handleWhatsAppSubmit = (e: FormEvent) => {
-        e.preventDefault();
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => entries.forEach(e => e.isIntersecting && e.target.classList.add("animate-in")),
+            { threshold: 0.1 }
+        );
+        document.querySelectorAll(".fade-up").forEach(el => observer.observe(el));
+        return () => observer.disconnect();
+    }, []);
 
-        // Formater le message pour WhatsApp
-        const text = `Bonjour SCALSET,\n\nJe suis ${name}.\nSujet: ${subject}\n\nMessage:\n${message}`;
-        const encodedText = encodeURIComponent(text);
-
-        // Rediriger vers WhatsApp
-        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`, "_blank");
-    };
+    const categories = ["Besoin de renfort", "Rejoindre l'équipe", "Partenariat", "Autre"];
 
     return (
-        <main className="min-h-screen pt-24 sm:pt-32 md:pt-40 pb-20 md:pb-32 relative flex flex-col items-center">
-            <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 w-full">
-                {/* Header Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="text-center mb-20"
-                >
-                    <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-6">
-                        Passons à <span className="text-transparent bg-clip-text bg-linear-to-r from-slate-300 to-slate-500">l&apos;action</span>
-                    </h1>
-                    <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto">
-                        Que vous souhaitiez confier vos opérations ou rejoindre notre équipe, nous sommes à votre écoute.
-                    </p>
-                </motion.div>
+        <>
+            <style>{`
+                .fade-up { opacity: 0; transform: translateY(28px); transition: opacity 0.7s cubic-bezier(.22,1,.36,1), transform 0.7s cubic-bezier(.22,1,.36,1); }
+                .fade-up.animate-in { opacity: 1; transform: translateY(0); }
+                .field { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 20px; color: #fff; font-size: 0.95rem; font-family: var(--font-montserrat), sans-serif; outline: none; transition: border-color 0.3s, box-shadow 0.3s; resize: none; }
+                .field::placeholder { color: rgba(255,255,255,0.2); }
+                .field:focus { border-color: rgba(212,175,55,0.5); box-shadow: 0 0 0 3px rgba(212,175,55,0.08); }
+                .cat-btn { padding: 10px 20px; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(255,255,255,0.45); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.25s; font-family: var(--font-montserrat), sans-serif; }
+                .cat-btn.active { border-color: #d4af37; color: #d4af37; background: rgba(212,175,55,0.08); }
+                .cat-btn:hover:not(.active) { border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.8); }
+                .contact-method { display: flex; align-items: center; gap: 20px; padding: 28px 32px; border-radius: 20px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); transition: border-color 0.3s; text-decoration: none; color: inherit; }
+                .contact-method:hover { border-color: rgba(255,255,255,0.15); }
+                .submit-btn { width: 100%; padding: 18px; border-radius: 14px; background: #d4af37; color: #000; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.18em; text-transform: uppercase; border: none; cursor: pointer; font-family: var(--font-montserrat), sans-serif; transition: background 0.3s, transform 0.2s; }
+                .submit-btn:hover { background: #e8c84d; transform: translateY(-2px); }
+            `}</style>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+            <main style={{ background: "#030303", color: "#fff", fontFamily: "var(--font-montserrat), sans-serif" }}>
 
-                    {/* Left Column: Form */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="glass-panel rounded-4xl sm:rounded-[2.5rem] p-6 sm:p-10 md:p-14 relative overflow-hidden w-full flex flex-col"
-                    >
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-500/10 rounded-bl-full blur-2xl pointer-events-none" />
+                {/* ── HERO ─────────────────────────────────── */}
+                <section style={{
+                    padding: "180px 24px 100px",
+                    textAlign: "center",
+                    position: "relative",
+                    overflow: "hidden",
+                }}>
+                    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+                        <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "60vw", height: "60vw", background: "radial-gradient(circle, rgba(212,175,55,0.04) 0%, transparent 65%)", borderRadius: "50%", filter: "blur(80px)" }}></div>
+                    </div>
+                    <div style={{ maxWidth: 800, margin: "0 auto", position: "relative", zIndex: 1 }}>
+                        <p className="fade-up" style={{ color: "#d4af37", fontSize: 11, fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 24 }}>— Contactez-nous —</p>
+                        <h1 className="fade-up" style={{ fontSize: "clamp(3rem, 8vw, 6.5rem)", fontWeight: 900, lineHeight: 0.92, letterSpacing: "-0.03em", textTransform: "uppercase", margin: "0 0 32px" }}>
+                            Passons à<br />
+                            <span style={{ color: "#d4af37" }}>l'action.</span>
+                        </h1>
+                        <p className="fade-up" style={{ fontSize: "clamp(1rem, 1.8vw, 1.2rem)", color: "rgba(255,255,255,0.45)", fontWeight: 300, lineHeight: 1.8, maxWidth: 520, margin: "0 auto" }}>
+                            Que vous souhaitiez confier vos opérations ou rejoindre notre équipe, nous sommes à votre écoute.
+                        </p>
+                    </div>
+                </section>
 
-                        <h2 className="text-2xl font-bold text-white mb-12 flex items-center gap-3">
-                            <MessageSquare className="text-slate-300" size={24} />
-                            Contact Rapide (WhatsApp)
-                        </h2>
+                {/* ── CONTACT LAYOUT ─────────────────────────────────── */}
+                <section style={{ padding: "80px 24px 140px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 60, alignItems: "start" }}>
 
-                        <form onSubmit={handleWhatsAppSubmit} className="flex flex-col gap-8 sm:gap-14 relative z-10">
-                            {/* Nom */}
-                            <div className="flex flex-col gap-3">
-                                <label className="text-sm font-semibold text-slate-300">Votre Nom Complet</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="Jean Dupont"
-                                    className="w-full bg-[#0d0d14] border border-white/10 rounded-xl px-4 sm:px-5 py-3 sm:py-4 text-white placeholder-slate-600 focus:outline-hidden focus:border-slate-400 focus:shadow-[0_0_15px_rgba(148,163,184,0.15)] transition-all duration-300"
+                        {/* LEFT: Form */}
+                        <div className="fade-up">
+                            <h2 style={{ fontSize: "1.6rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 40 }}>Envoyer un message</h2>
+                            <form onSubmit={e => e.preventDefault()} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                    <label style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>Votre nom complet</label>
+                                    <input type="text" required placeholder="Jean Dupont" className="field" />
+                                </div>
+
+                                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                    <label style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>Email</label>
+                                    <input type="email" required placeholder="jean@company.com" className="field" />
+                                </div>
+
+                                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                    <label style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>Catégorie</label>
+                                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                                        {categories.map(cat => (
+                                            <button key={cat} type="button" onClick={() => setCategory(cat)} className={`cat-btn ${category === cat ? "active" : ""}`}>{cat}</button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                    <label style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>Votre message</label>
+                                    <textarea required rows={5} placeholder="Décrivez-nous votre besoin..." className="field" />
+                                </div>
+
+                                <button type="submit" className="submit-btn" style={{ marginTop: 8 }}>Envoyer le message</button>
+                            </form>
+                        </div>
+
+                        {/* RIGHT: Info */}
+                        <div className="fade-up" style={{ transitionDelay: "0.15s", display: "flex", flexDirection: "column", gap: 32 }}>
+                            <div>
+                                <h2 style={{ fontSize: "1.6rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 12 }}>Coordonnées</h2>
+                                <p style={{ color: "rgba(255,255,255,0.4)", lineHeight: 1.7 }}>Réponse garantie sous 24 heures ouvrées. Nous travaillons avec des clients partout dans le monde.</p>
+                            </div>
+
+                            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                                {contactMethods.map((method, i) => {
+                                    const El = method.href ? "a" : "div";
+                                    return (
+                                        <El key={i} {...(method.href ? { href: method.href } : {})} className="contact-method" style={{ textDecoration: "none", color: "inherit" }}>
+                                            <div style={{
+                                                width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+                                                background: method.green ? "rgba(37,211,102,0.1)" : "rgba(255,255,255,0.04)",
+                                                border: `1px solid ${method.green ? "rgba(37,211,102,0.3)" : "rgba(255,255,255,0.08)"}`,
+                                                display: "flex", alignItems: "center", justifyContent: "center",
+                                                color: method.green ? "#25D366" : "rgba(255,255,255,0.6)",
+                                            }}>{method.icon}</div>
+                                            <div>
+                                                <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>{method.label}</p>
+                                                <p style={{ fontSize: "1rem", fontWeight: 600, color: "#fff", margin: 0 }}>{method.value}</p>
+                                            </div>
+                                        </El>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Map */}
+                            <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)", height: 260 }}>
+                                <iframe
+                                    title="Dubaï Silicon Oasis"
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d115598.67571344445!2d55.22896574929853!3d25.12061245089308!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f6153675005b7%3A0x6bba0fafa9321e10!2sDubai%20Silicon%20Oasis!5e0!3m2!1sen!2sfr!4v1709400000000!5m2!1sen!2sfr"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) brightness(80%) contrast(85%) grayscale(30%)" }}
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
                                 />
-                            </div>
-
-                            {/* Sujet (Pre-written categories) */}
-                            <div className="flex flex-col gap-3">
-                                <label className="text-sm font-semibold text-slate-300">Catégorie de demande</label>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {CATEGORIES.map((cat) => (
-                                        <button
-                                            key={cat.label}
-                                            type="button"
-                                            onClick={() => {
-                                                setSubject(cat.label);
-                                                setMessage(cat.defaultText);
-                                            }}
-                                            className={`cursor-pointer py-3.5 px-4 rounded-xl text-sm font-medium transition-all duration-300 border ${subject === cat.label
-                                                ? "bg-slate-400/20 border-slate-300 text-white shadow-[0_0_15px_rgba(148,163,184,0.2)]"
-                                                : "bg-[#0d0d14] border-white/5 text-slate-400 hover:border-slate-400/30 hover:bg-slate-400/5 hover:text-slate-200"
-                                                }`}
-                                        >
-                                            {cat.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Message */}
-                            <div className="flex flex-col gap-3">
-                                <label className="text-sm font-semibold text-slate-300">Votre Message</label>
-                                <textarea
-                                    required
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    rows={5}
-                                    placeholder="Décrivez-nous votre besoin..."
-                                    className="w-full bg-[#0d0d14] border border-white/10 rounded-xl px-5 py-4 text-white placeholder-slate-600 focus:outline-hidden focus:border-slate-400 focus:shadow-[0_0_15px_rgba(148,163,184,0.15)] transition-all duration-300 resize-none"
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="cursor-pointer mt-4 w-full bg-white hover:bg-slate-100 hover:scale-[1.02] text-black font-bold py-5 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transform active:scale-[0.98] flex justify-center items-center gap-3"
-                            >
-                                <Send size={20} className="text-black" />
-                                Lancer la discussion
-                            </button>
-                        </form>
-                    </motion.div>
-
-                    {/* Right Column: Info & Map */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="flex flex-col gap-14"
-                    >
-                        <div className="space-y-10 md:px-0 px-4">
-                            <h2 className="text-3xl font-bold text-white tracking-tight">Nos Coordonnées</h2>
-
-                            <div className="flex items-start gap-6 group cursor-default">
-                                <div className="w-16 h-16 rounded-2xl bg-slate-500/10 border border-slate-500/30 flex items-center justify-center shrink-0 group-hover:bg-slate-500/20 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(148,163,184,0.15)] transition-all duration-300">
-                                    <MapPin className="text-slate-300 group-hover:text-slate-100 transition-colors" size={28} />
-                                </div>
-                                <div>
-                                    <h4 className="text-slate-200 font-bold text-xl mb-1 mt-1 transition-colors group-hover:text-white">Dubaï (Siège)</h4>
-                                    <p className="text-slate-400 leading-relaxed text-base group-hover:text-slate-300 transition-colors">
-                                        Dubaï Silicon Oasis<br />
-                                        Émirats Arabes Unis
-                                    </p>
-                                </div>
-                            </div>
-
-                            <a href="mailto:contact@scalset.com" className="flex items-start gap-6 group cursor-pointer w-fit pb-1 border-b border-transparent hover:border-slate-500/30 transition-all duration-300">
-                                <div className="w-16 h-16 rounded-2xl bg-slate-500/10 border border-slate-500/30 flex items-center justify-center shrink-0 group-hover:bg-slate-500/20 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(148,163,184,0.15)] transition-all duration-300">
-                                    <Mail className="text-slate-300 group-hover:text-slate-100 transition-colors" size={28} />
-                                </div>
-                                <div className="flex flex-col justify-center">
-                                    <h4 className="text-slate-200 font-bold text-xl mb-1 mt-1 transition-colors group-hover:text-white">Email</h4>
-                                    <span className="text-slate-400 group-hover:text-slate-300 text-base transition-colors">
-                                        contact@scalset.com
-                                    </span>
-                                </div>
-                            </a>
-
-                            <div className="flex items-start gap-6 group cursor-default">
-                                <div className="w-16 h-16 rounded-2xl bg-slate-500/10 border border-slate-500/30 flex items-center justify-center shrink-0 group-hover:bg-slate-500/20 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(148,163,184,0.15)] transition-all duration-300">
-                                    <Phone className="text-slate-300 group-hover:text-slate-100 transition-colors" size={28} />
-                                </div>
-                                <div>
-                                    <h4 className="text-slate-200 font-bold text-xl mb-1 mt-1 transition-colors group-hover:text-white sm:pl-4">WhatsApp Business</h4>
-                                    <p className="text-slate-300 font-medium group-hover:text-white transition-colors">+971 56 284 16 93</p>
-                                    <p className="text-slate-500 text-base group-hover:text-slate-400 transition-colors">Réponse sous 24h</p>
-                                </div>
                             </div>
                         </div>
 
-                        {/* Google Maps Embed */}
-                        <div className="glass-panel w-full h-[220px] sm:h-[280px] md:h-[350px] rounded-[2rem] overflow-hidden relative shrink-0">
-                            {/* Grayscale/Invert filter to match dark aesthetics perfectly */}
-                            <iframe
-                                title="Localisation Dubaï"
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d115598.67571344445!2d55.22896574929853!3d25.12061245089308!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f6153675005b7%3A0x6bba0fafa9321e10!2sDubai%20Silicon%20Oasis%20-%20Dubai%20-%20United%20Arab%20Emirates!5e0!3m2!1sen!2sfr!4v1709400000000!5m2!1sen!2sfr"
-                                width="100%"
-                                height="100%"
-                                style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) brightness(85%) contrast(85%)" }}
-                                allowFullScreen={false}
-                                loading="lazy"
-                                referrerPolicy="no-referrer-when-downgrade"
-                            />
-                        </div>
+                    </div>
+                </section>
 
-                    </motion.div>
-                </div>
-            </div>
-        </main>
+            </main>
+        </>
     );
 }

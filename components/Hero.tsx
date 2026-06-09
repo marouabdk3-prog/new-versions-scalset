@@ -1,66 +1,101 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import SandButton from "./SandButton";
 
 export default function Hero() {
-    const videoRef = useRef<HTMLVideoElement>(null);
+    const [scrollPct, setScrollPct] = useState(0); // 0 → 1
+    const containerRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        const onScroll = () => {
+            const scrollY = window.scrollY;
+            // The sticky section has 100vh of scrollable space (200vh total - 100vh sticky)
+            const SCROLL_DISTANCE = window.innerHeight * 1.2; 
+            const pct = Math.min(1, scrollY / SCROLL_DISTANCE);
+            setScrollPct(pct);
+        };
+
+        // Run once on mount to get correct height
+        onScroll();
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
+    // Scroll Mappings (0 to 1)
+    
+    // Smoke: Darkens the background quickly on scroll
+    const smokeOpacity = Math.min(1, scrollPct * 3);
+
+    // Main Content (Title + Paragraph + CTA): Fades in together
+    let contentOpacity = 0;
+    if (scrollPct >= 0.15 && scrollPct < 0.4) {
+        contentOpacity = (scrollPct - 0.15) / 0.25;
+    } else if (scrollPct >= 0.4) {
+        contentOpacity = 1;
+    }
+
+    const contentY = scrollPct < 0.4 ? 40 * (1 - contentOpacity) : 0;
+
+    // No master opacity fade — the hero stays visible as it scrolls up
+    
     return (
         <>
-            {/* ═══ SECTION 1 — HERO ═══ */}
-            <section
-                className="relative overflow-hidden bg-black"
-                style={{ height: "100dvh", minHeight: 560 }}
+            {/* Sticky container — 200vh for a tight, punchy scroll */}
+            <div
+                ref={containerRef}
+                style={{ height: "200vh", position: "relative", zIndex: 3 }}
+                id="hero-section"
             >
-                {/* ── BACKGROUND IMAGE ── */}
-                <div className="absolute inset-0 z-0 overflow-hidden">
-                    <Image
-                        src="/images/hero-bg2.png"
-                        alt="Hero background"
-                        fill
-                        priority
-                        className="object-cover object-center"
-                    />
+                <div style={{
+                    position: "sticky",
+                    top: 0,
+                    width: "100%",
+                    height: "100vh",
+                    overflow: "hidden",
+                    background: "#000",
+                }}>
 
-                    {/* Film grain */}
-                    <div className="film-grain-overlay" />
+                    {/* ── BACKGROUND IMAGE ── */}
+                    <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+                        <Image
+                            src="/images/hero-bg2.png"
+                            alt="Hero background"
+                            fill
+                            priority
+                            style={{ objectFit: "cover", objectPosition: "center" }}
+                        />
+                    </div>
 
-                    {/* Cadre fumée noire */}
+                    {/* ── BOTTOM FADE on image ── */}
                     <div style={{
-                        position: "absolute", inset: 0,
-                        background: "radial-gradient(ellipse at 50% 50%, transparent 28%, rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.80) 78%, rgba(0,0,0,0.97) 100%)",
+                        position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
+                        background: "linear-gradient(to bottom, transparent 70%, black 100%)"
                     }} />
-                    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.26)" }} />
-                    <div style={{
-                        position: "absolute", top: 0, left: 0, right: 0, height: "18%",
-                        background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%)",
-                    }} />
-                    <div style={{
-                        position: "absolute", bottom: 0, left: 0, right: 0, height: "28%",
-                        background: "linear-gradient(to top, #000 0%, transparent 100%)",
-                    }} />
-                </div>
 
-                {/* ── HERO CONTENT ── */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
-                    className="absolute inset-0 z-10 w-full h-full"
-                >
-                    {/* Logo métallique et Texte - On the Wall */}
-                    <div className="absolute top-[28%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6 animate-metalGlow opacity-90" style={{
+                    {/* ── SMOKE OVERLAY ── */}
+                    <div style={{
+                        position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none",
+                        opacity: smokeOpacity,
+                        background: "radial-gradient(ellipse at 25% 55%, rgba(0,0,0,0.85) 20%, rgba(0,0,0,0.6) 55%, rgba(0,0,0,0.05) 100%)",
+                        transition: "opacity 0.1s linear",
+                    }} />
+
+                    {/* ── LOGO ON THE WALL ── */}
+                    <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-6 animate-metalGlow" style={{
+                        top: "12%",
+                        zIndex: 3, 
+                        pointerEvents: "none",
+                        opacity: Math.max(0, 0.9 - scrollPct * 6),
                         filter: "drop-shadow(0 0 30px rgba(212,175,55,0.4))"
                     }}>
                         <div className="relative" style={{
                             width: "clamp(100px, 15vw, 180px)",
                             height: "clamp(100px, 15vw, 180px)",
                         }}>
-                            <Image src="/100.svg" alt="Scalset Logo" fill style={{ objectFit: "contain" }} />
+                            <Image src="/100.svg" alt="Scalset Logo" fill style={{ objectFit: "contain" }} priority />
                         </div>
                         <span className="font-sans tracking-[0.6em] uppercase text-2xl md:text-3xl lg:text-4xl font-light" style={{
                             background: "linear-gradient(180deg, #ffffff 0%, #eaddc5 100%)",
@@ -72,85 +107,95 @@ export default function Hero() {
                         </span>
                     </div>
 
-                    {/* Left aligned content block */}
-                    <div className="flex flex-col justify-center h-full w-full max-w-[45%] px-6 sm:px-10 lg:px-20 text-left">
-                        {/* Top tagline retiré à la demande de l'utilisateur */}
-
-                        {/* Grand titre retiré à la demande de l'utilisateur */}
-
-                        {/* Nouveau Titre Elegant Serif */}
-                        <h1 style={{
-                            fontFamily: "var(--font-cormorant)",
-                            fontWeight: 300,
-                            fontSize: "clamp(2.5rem, 6.5vw, 5.5rem)",
-                            lineHeight: 1.1,
-                            color: "#eaddc5",
-                            letterSpacing: "-0.02em",
-                            filter: "drop-shadow(0px 4px 10px rgba(0,0,0,0.6))"
+                    {/* ── PHASED CONTENT CONTAINER (All Text Together) ── */}
+                    <div style={{
+                        position: "absolute", inset: 0, zIndex: 4,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        padding: "0 clamp(20px, 5vw, 40px)",
+                        pointerEvents: contentOpacity > 0.5 ? "auto" : "none",
+                    }}>
+                        
+                        <div style={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: 700,
+                            opacity: contentOpacity,
+                            transform: `translateY(${contentY}px)`,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            textAlign: "center",
+                            gap: 36,
                         }}>
-                            Construisez plus grand.<br />
-                            <em style={{ fontStyle: "italic" }}>Exécutez plus vite.</em>
-                        </h1>
-
-                        {/* Sous-titre italic */}
-                        <p style={{
-                            fontFamily: "var(--font-cormorant)",
-                            fontStyle: "italic",
-                            fontSize: "clamp(1rem, 2.2vw, 1.45rem)",
-                            color: "rgba(255,255,255,0.58)",
-                            maxWidth: "44rem",
-                            lineHeight: 1.75,
-                        }} className="mt-5 sm:mt-7">
-                            Nous recrutons, formons et supervisons votre équipe dans nos locaux,
-                            tout en restant pilotée par vous.
-                        </p>
-
-                        {/* CTA Button */}
-                        <div className="mt-8 sm:mt-12 flex flex-col gap-4">
-                            <Link href="/contact" className="group relative px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-all duration-500 bg-black flex items-center justify-center overflow-hidden w-fit" style={{
-                                border: "1px solid rgba(234, 221, 197, 0.7)",
-                                boxShadow: "0 0 15px rgba(234, 221, 197, 0.2)",
+                            
+                            {/* TITLE */}
+                            <h1 style={{
+                                fontFamily: "var(--font-montserrat), sans-serif",
+                                fontWeight: 300,
+                                fontSize: "clamp(2.2rem, 4.5vw, 4rem)",
+                                lineHeight: 1.15,
+                                color: "#eaddc5",
+                                letterSpacing: "-0.03em",
+                                margin: 0,
+                                filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.8))",
                             }}>
-                                <div className="absolute inset-0 bg-[#eaddc5]/0 group-hover:bg-[#eaddc5]/10 transition-colors duration-500" />
-                                <span className="relative font-sans font-bold text-xs sm:text-sm tracking-wide" style={{
-                                    background: "linear-gradient(180deg, #ffffff 0%, #eaddc5 100%)",
-                                    WebkitBackgroundClip: "text",
-                                    WebkitTextFillColor: "transparent",
-                                    filter: "drop-shadow(0px 3px 5px rgba(0,0,0,0.9))"
+                                Construisez plus grand.<br />
+                                <span style={{ fontWeight: 500, color: "#fff" }}>Exécutez plus vite.</span>
+                            </h1>
+
+                            {/* PARAGRAPH & CTA */}
+                            <div style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: 32,
+                            }}>
+                                <p style={{
+                                    fontFamily: "var(--font-montserrat), sans-serif",
+                                    fontWeight: 300,
+                                    fontSize: "clamp(1.1rem, 1.5vw, 1.3rem)",
+                                    color: "rgba(255,255,255,0.85)",
+                                    lineHeight: 1.6,
+                                    margin: 0,
                                 }}>
-                                    Nous Contacter
-                                </span>
-                            </Link>
-                            <p style={{
-                                fontFamily: "var(--font-space-grotesk)",
-                                fontSize: "0.6rem",
-                                letterSpacing: "0.38em",
-                                color: "rgba(255,255,255,0.28)",
-                            }} className="uppercase">
-                                Scalset exécute le reste
-                            </p>
+                                    Nous recrutons, formons et supervisons votre équipe dans nos locaux, tout en restant pilotée par vous.
+                                </p>
+
+                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+                                    <SandButton href="/contact">Nous Contacter</SandButton>
+                                    <span style={{
+                                        fontFamily: "var(--font-montserrat), sans-serif",
+                                        fontSize: "0.6rem",
+                                        letterSpacing: "0.38em",
+                                        color: "rgba(255,255,255,0.28)",
+                                        textTransform: "uppercase",
+                                    }}>
+                                        Scalset exécute le reste
+                                    </span>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
-                </motion.div>
 
-                {/* Scroll indicator */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1, duration: 1 }}
-                    className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
-                >
-                    <div className="relative w-px h-10 overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-                        <motion.div
-                            animate={{ y: ["-100%", "100%"], opacity: [0, 1, 0] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute inset-0 w-full h-1/2"
-                            style={{ background: "linear-gradient(to bottom, transparent, rgba(212,175,55,0.7), transparent)" }}
-                        />
+                    {/* ── SCROLL INDICATOR (visible only at start) ── */}
+                    <div style={{
+                        position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)",
+                        display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                        zIndex: 5, pointerEvents: "none",
+                        opacity: Math.max(0, 1 - scrollPct * 5),
+                        transition: "opacity 0.1s linear",
+                    }}>
+                        <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.08)", position: "relative", overflow: "hidden", borderRadius: 4 }}>
+                            <div className="animate-scroll-drop" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: 15, background: "#d4af37" }} />
+                        </div>
+                        <span style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(255,255,255,0.3)", fontFamily: "var(--font-montserrat), sans-serif" }}>
+                            Scroll
+                        </span>
                     </div>
-                </motion.div>
-            </section>
 
+                </div>
+            </div>
         </>
     );
 }

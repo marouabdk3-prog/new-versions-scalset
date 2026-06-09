@@ -1,130 +1,207 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence, useScroll } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useLogoAnimation } from "./LogoAnimationContext";
 
 const navItems = [
     { name: "Accueil", href: "/" },
-    { name: "A propos", href: "/a-propos" },
+    { name: "À propos", href: "/a-propos" },
     { name: "Services", href: "/services" },
     { name: "Contact", href: "/contact" },
 ];
 
 export default function Header() {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
     const { scrollY } = useScroll();
     const { navLogoRef, navLogoVisible } = useLogoAnimation();
+    const pathname = usePathname();
 
-    const logoScale = useTransform(scrollY, [0, 80, 160], [1, 1.08, 1]);
+    useEffect(() => {
+        return scrollY.onChange((v) => setScrolled(v > 50));
+    }, [scrollY]);
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-110 flex items-start justify-between px-4 sm:px-6 pt-3 sm:pt-4">
+        <header style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 110,
+            transition: "background 0.5s, backdrop-filter 0.5s, box-shadow 0.5s, padding 0.5s",
+            background: scrolled ? "rgba(5,5,5,0.85)" : "transparent",
+            backdropFilter: scrolled ? "blur(20px)" : "none",
+            boxShadow: scrolled ? "0 1px 0 rgba(255,255,255,0.05)" : "none",
+            padding: scrolled ? "14px 0" : "20px 0",
+        }}>
+            <div style={{
+                maxWidth: 1400,
+                margin: "0 auto",
+                padding: "0 48px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+            }}>
 
-            {/* ── LOGO — gauche ── */}
-            <motion.div
-                ref={navLogoRef}
-                initial={{ y: -40, opacity: 0 }}
-                animate={{ y: 0, opacity: navLogoVisible ? 1 : 0 }}
-                transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                style={{ scale: logoScale, transformOrigin: "left center" }}
-                className="shrink-0 relative z-10"
-            >
-                <Link href="/" className="focus:outline-none relative block w-32 md:w-44 lg:w-64 h-11 md:h-14 overflow-hidden">
-                    <Image
-                        src="/SCALSET-1.ico"
-                        alt="ScalSet Logo"
-                        fill
-                        sizes="(min-width: 1024px) 290px, (min-width: 768px) 200px, 145px"
-                        className="object-contain object-left scale-[2.6] origin-left"
-                        priority
-                    />
-                </Link>
-            </motion.div>
-
-            {/* ── NAV PILL ── */}
-            <motion.header
-                initial={{ y: -40, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                className="group relative z-10"
-            >
-                {/* Desktop pill */}
-                <nav
-                    className="hidden md:flex items-center gap-8 px-7 py-2.5 rounded-2xl relative overflow-hidden"
-                    style={{
-                        background: "rgba(4, 4, 8, 0.55)",
-                        backdropFilter: "blur(18px) saturate(160%)",
-                        WebkitBackdropFilter: "blur(18px) saturate(160%)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)",
-                    }}
+                {/* ── LOGO ── */}
+                <motion.div
+                    ref={navLogoRef}
+                    initial={{ opacity: 0, y: -16 }}
+                    animate={{ opacity: navLogoVisible ? 1 : 0, y: 0 }}
+                    transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
                 >
-                    <div className="absolute inset-x-0 bottom-0 h-px pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                        style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 15%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.3) 85%, transparent 100%)", boxShadow: "0 0 12px 2px rgba(255,255,255,0.6)" }} />
-                    {navItems.map((item) => (
-                        <Link key={item.href} href={item.href} className="relative group/link py-1">
-                            <span className="text-[11px] font-bold tracking-[0.2em] uppercase transition-opacity duration-300 hover:opacity-70" style={{ color: "#c8c8c8" }}>
-                                {item.name}
-                            </span>
-                        </Link>
-                    ))}
-                </nav>
+                    <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+                        <Image src="/100.svg" alt="ScalSet" width={52} height={52} style={{ display: "block", filter: "drop-shadow(0 0 8px rgba(255,255,255,0.25))" }} priority />
+                    </Link>
+                </motion.div>
 
-                {/* Mobile toggle */}
-                <button
-                    className="md:hidden text-slate-400 hover:text-white p-2 relative z-10 transition-colors duration-200"
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    aria-label="Toggle menu"
+                {/* ── DESKTOP NAV ── */}
+                <motion.nav
+                    initial={{ opacity: 0, y: -16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    className="hidden lg:flex"
                 >
-                    <AnimatePresence mode="wait" initial={false}>
-                        <motion.span
-                            key={isMobileMenuOpen ? "close" : "open"}
-                            initial={{ rotate: -90, opacity: 0 }}
-                            animate={{ rotate: 0, opacity: 1 }}
-                            exit={{ rotate: 90, opacity: 0 }}
-                            transition={{ duration: 0.18 }}
-                        >
-                            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-                        </motion.span>
-                    </AnimatePresence>
-                </button>
-            </motion.header>
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                            <Link key={item.href} href={item.href} style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                                padding: "8px 18px",
+                                borderRadius: 9999,
+                                border: isActive ? "1px solid rgba(212,175,55,0.5)" : "1px solid transparent",
+                                background: isActive ? "rgba(212,175,55,0.06)" : "transparent",
+                                textDecoration: "none",
+                                transition: "all 0.25s",
+                            }}
+                                onMouseEnter={e => {
+                                    if (!isActive) {
+                                        (e.currentTarget as HTMLElement).style.border = "1px solid rgba(255,255,255,0.1)";
+                                        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                                    }
+                                }}
+                                onMouseLeave={e => {
+                                    if (!isActive) {
+                                        (e.currentTarget as HTMLElement).style.border = "1px solid transparent";
+                                        (e.currentTarget as HTMLElement).style.background = "transparent";
+                                    }
+                                }}
+                            >
+                                <span style={{
+                                    fontSize: "0.78rem",
+                                    fontWeight: 700,
+                                    letterSpacing: "0.12em",
+                                    textTransform: "uppercase",
+                                    color: isActive ? "#d4af37" : "rgba(255,255,255,0.8)",
+                                    fontFamily: "var(--font-montserrat), sans-serif",
+                                }}>
+                                    {item.name}
+                                </span>
+                            </Link>
+                        );
+                    })}
+                </motion.nav>
 
-            {/* ── MOBILE DROPDOWN ── */}
+                {/* ── RIGHT: LANG + MOBILE ── */}
+                <motion.div
+                    initial={{ opacity: 0, y: -16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
+                    style={{ display: "flex", alignItems: "center", gap: 16 }}
+                >
+                    {/* Language — desktop */}
+                    <div className="hidden lg:flex" style={{ alignItems: "center", gap: 4 }}>
+                        <button style={{
+                            padding: "6px 12px", borderRadius: 9999,
+                            background: "rgba(255,255,255,0.08)", border: "none",
+                            color: "#fff", fontSize: "0.75rem", fontWeight: 700,
+                            letterSpacing: "0.12em", cursor: "pointer",
+                            fontFamily: "var(--font-montserrat), sans-serif",
+                        }}>FR</button>
+                        <button style={{
+                            padding: "6px 12px", borderRadius: 9999,
+                            background: "transparent", border: "none",
+                            color: "rgba(255,255,255,0.38)", fontSize: "0.75rem", fontWeight: 700,
+                            letterSpacing: "0.12em", cursor: "pointer",
+                            fontFamily: "var(--font-montserrat), sans-serif",
+                            transition: "color 0.2s",
+                        }}
+                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#fff"}
+                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.38)"}
+                        >EN</button>
+                    </div>
+
+                    {/* Mobile hamburger */}
+                    <button
+                        className="lg:hidden"
+                        onClick={() => setMobileOpen(!mobileOpen)}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: "#fff", display: "flex", alignItems: "center", padding: 8 }}
+                    >
+                        {mobileOpen ? (
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        ) : (
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+                        )}
+                    </button>
+                </motion.div>
+            </div>
+
+            {/* ── MOBILE MENU ── */}
             <AnimatePresence>
-                {isMobileMenuOpen && (
+                {mobileOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: -8, scaleY: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scaleY: 1 }}
-                        exit={{ opacity: 0, y: -8, scaleY: 0.95 }}
-                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                        className="absolute top-14 left-4 right-4 rounded-2xl overflow-hidden origin-top"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.2 }}
                         style={{
-                            background: "rgba(6, 6, 12, 0.92)",
-                            backdropFilter: "blur(28px) saturate(170%)",
-                            WebkitBackdropFilter: "blur(28px) saturate(170%)",
-                            border: "1px solid rgba(255,255,255,0.09)",
-                            boxShadow: "0 24px 64px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.08)",
+                            position: "absolute",
+                            top: "100%",
+                            left: 16,
+                            right: 16,
+                            marginTop: 8,
+                            borderRadius: 20,
+                            background: "rgba(8,8,8,0.97)",
+                            backdropFilter: "blur(24px)",
+                            border: "1px solid rgba(212,175,55,0.15)",
+                            boxShadow: "0 24px 60px rgba(0,0,0,0.8)",
+                            overflow: "hidden",
                         }}
                     >
-                        <div className="h-px w-full pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 50%, transparent)" }} />
-                        <div className="flex flex-col items-center gap-1 py-5 px-3">
+                        <div style={{ display: "flex", flexDirection: "column", padding: "20px 16px" }}>
                             {navItems.map((item, i) => (
-                                <motion.div key={item.href} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.055, duration: 0.2 }} className="w-full">
-                                    <Link href={item.href} onClick={() => setIsMobileMenuOpen(false)}
-                                        className="block text-center py-3 px-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-slate-400 hover:text-white transition-colors duration-200 rounded-xl hover:bg-white/5">
-                                        {item.name}
-                                    </Link>
-                                </motion.div>
+                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} style={{
+                                    display: "block",
+                                    padding: "14px 16px",
+                                    borderRadius: 12,
+                                    color: pathname === item.href ? "#d4af37" : "rgba(255,255,255,0.8)",
+                                    fontSize: "0.85rem",
+                                    fontWeight: 700,
+                                    letterSpacing: "0.12em",
+                                    textTransform: "uppercase",
+                                    textDecoration: "none",
+                                    background: pathname === item.href ? "rgba(212,175,55,0.06)" : "transparent",
+                                    fontFamily: "var(--font-montserrat), sans-serif",
+                                    marginBottom: 4,
+                                }}>
+                                    {item.name}
+                                </Link>
                             ))}
+                            <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", marginTop: 12, paddingTop: 16, display: "flex", gap: 8, justifyContent: "center" }}>
+                                <button style={{ padding: "8px 20px", borderRadius: 9999, background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em", cursor: "pointer", fontFamily: "var(--font-montserrat), sans-serif" }}>FR</button>
+                                <button style={{ padding: "8px 20px", borderRadius: 9999, background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em", cursor: "pointer", fontFamily: "var(--font-montserrat), sans-serif" }}>EN</button>
+                            </div>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </header>
     );
 }

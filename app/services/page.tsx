@@ -1,345 +1,142 @@
 "use client";
 
-import { motion } from "framer-motion";
-import Image from "next/image";
-import {
-    ArrowRight,
-    Handshake,
-    CalendarDays,
-    Users,
-    PenTool,
-    Palette,
-    Film,
-    Briefcase,
-    Headset,
-    Code,
-    Target,
-    CheckCircle2,
-    MessageCircle,
-    Search,
-    FileText,
-    Video,
-    Rocket
-} from "lucide-react";
+import { useEffect } from "react";
 import Link from "next/link";
 
-const whys = [
-    "Réduire les coûts de recrutement et de formation",
-    "Accéder rapidement à des compétences spécialisées",
-    "Gagner en flexibilité et en agilité opérationnelle",
-    "Se libérer du management quotidien",
-    "Améliorer la qualité d'exécution globale",
-];
-
 const profiles = [
-    { title: "Closer", description: "Conversion de prospects et closing des ventes à haute valeur ajoutée.", icon: Handshake, image: "/closer.webp" },
-    { title: "Setter", description: "Qualification des contacts, prospection et génération de rendez-vous qualifiés.", icon: CalendarDays, image: "/setter.webp" },
-    { title: "Community Manager", description: "Gestion et animation de vos communautés sur l'ensemble des réseaux sociaux.", icon: Users, image: "/31.jpeg", objectPosition: "center 30%" },
-    { title: "Copywriter", description: "Rédaction de textes persuasifs pour vos pages de vente, emails et publicités.", icon: PenTool, image: "/copy writer.jpeg" },
-    { title: "Designer graphique", description: "Création d'identités visuelles, publications et supports de communication percutants.", icon: Palette, image: "/Graphique.jpeg" },
-    { title: "Vidéaste", description: "Montage vidéo dynamique (réels, TikToks) pour vos réseaux sociaux et publicités.", icon: Film, image: "/Vidéaste.jpeg" },
-    { title: "Assistant de direction", description: "Gestion administrative, organisation des plannings et support quotidien de l'exécutif.", icon: Briefcase, image: "/Assistant de direction.jpeg", objectPosition: "center 30%" },
-    { title: "Support client", description: "Assistance réactive, gestion des litiges et fidélisation de vos clients.", icon: Headset, image: "/Support client.jpeg" },
-    { title: "Développeur Web", description: "Création, maintenance et optimisation de vos sites web, pages de capture et applications.", icon: Code, image: "/Développeur Web.jpeg" },
-    { title: "Media buyer", description: "Création, gestion et optimisation de vos campagnes d'acquisition payantes sur toutes les plateformes.", icon: Target, image: "/Media buyer.jpeg" },
+    { name: "Closer", desc: "Conversion de prospects et closing des ventes à haute valeur ajoutée." },
+    { name: "Setter", desc: "Qualification des contacts, prospection et génération de rendez-vous qualifiés." },
+    { name: "Copywriter", desc: "Rédaction de textes persuasifs pour vos pages de vente, emails et publicités." },
+    { name: "Community Manager", desc: "Gestion et animation de vos communautés sur l'ensemble des réseaux sociaux." },
+    { name: "Designer Graphique", desc: "Création d'identités visuelles, publications et supports de communication percutants." },
+    { name: "Vidéaste", desc: "Montage vidéo dynamique (réels, TikToks) pour vos réseaux sociaux et publicités." },
+    { name: "Assistant de Direction", desc: "Gestion administrative, organisation des plannings et support quotidien." },
+    { name: "Support Client", desc: "Assistance réactive, gestion des litiges et fidélisation de vos clients." },
+    { name: "Développeur Web", desc: "Création, maintenance et optimisation de vos sites web et applications." },
+    { name: "Media Buyer", desc: "Création, gestion et optimisation de vos campagnes d'acquisition payantes." },
 ];
 
-const processSteps = [
-    {
-        title: "Prise de contact",
-        description: "Vous nous contactez directement sur WhatsApp et échangez avec un membre de notre équipe.",
-        icon: MessageCircle
-    },
-    {
-        title: "Analyse de votre besoin",
-        description: "Nous comprenons votre activité, vos objectifs et les profils dont vous avez réellement besoin.",
-        icon: Search
-    },
-    {
-        title: "Proposition adaptée",
-        description: "Nous vous proposons une solution claire avec les profils les plus pertinents pour votre projet.",
-        icon: FileText
-    },
-    {
-        title: "Appel si nécessaire",
-        description: "Un appel visio peut être organisé pour affiner les détails et valider ensemble la mise en place.",
-        icon: Video
-    },
-    {
-        title: "Mise en place rapide",
-        description: "Nous constituons votre équipe et vous pouvez commencer à travailler immédiatement.",
-        icon: Rocket
-    }
+const steps = [
+    { n: "01", title: "Prise de contact", desc: "Vous nous contactez directement sur WhatsApp et échangez avec un membre de notre équipe." },
+    { n: "02", title: "Analyse du besoin", desc: "Nous comprenons votre activité, vos objectifs et les profils dont vous avez réellement besoin." },
+    { n: "03", title: "Proposition adaptée", desc: "Nous vous proposons une solution claire avec les profils les plus pertinents pour votre projet." },
+    { n: "04", title: "Appel si nécessaire", desc: "Un appel visio peut être organisé pour affiner les détails et valider ensemble la mise en place." },
+    { n: "05", title: "Mise en place rapide", desc: "Nous constituons votre équipe et vous pouvez commencer à travailler immédiatement." },
 ];
 
-const fadeUp = {
-    hidden: { opacity: 0, y: 24 },
-    show: (i: number) => ({
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] as const },
-    }),
-};
+export default function ServicesPage() {
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => entries.forEach(e => e.isIntersecting && e.target.classList.add("animate-in")),
+            { threshold: 0.1 }
+        );
+        document.querySelectorAll(".fade-up").forEach(el => observer.observe(el));
+        return () => observer.disconnect();
+    }, []);
 
-export default function Services() {
     return (
-        <main className="min-h-screen pt-24 sm:pt-32 pb-20 sm:pb-32 relative overflow-hidden">
+        <>
+            <style>{`
+                .fade-up { opacity: 0; transform: translateY(28px); transition: opacity 0.7s cubic-bezier(.22,1,.36,1), transform 0.7s cubic-bezier(.22,1,.36,1); }
+                .fade-up.animate-in { opacity: 1; transform: translateY(0); }
+                .profile-card { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 36px 32px; transition: border-color 0.35s, transform 0.35s; cursor: default; }
+                .profile-card:hover { border-color: rgba(212,175,55,0.35); transform: translateY(-6px); }
+                .step-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 36px 40px; display: flex; gap: 28px; align-items: flex-start; }
+            `}</style>
 
-            {/* Animated Ambient Background Glows */}
-            <motion.div
-                className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-slate-300/[0.03] blur-[120px] rounded-full pointer-events-none"
-                animate={{
-                    scale: [1, 1.2, 1],
-                    x: [0, 50, 0],
-                    y: [0, 30, 0],
-                }}
-                transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-                className="absolute top-[30%] right-[-10%] w-[40vw] h-[40vw] bg-white/[0.02] blur-[150px] rounded-full pointer-events-none"
-                animate={{
-                    scale: [1, 1.1, 1],
-                    x: [0, -40, 0],
-                    y: [0, -50, 0],
-                }}
-                transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            />
-            <motion.div
-                className="absolute bottom-[-10%] left-[20%] w-[45vw] h-[45vw] bg-slate-400/[0.02] blur-[130px] rounded-full pointer-events-none"
-                animate={{
-                    scale: [1, 1.2, 1],
-                    x: [0, 30, 0],
-                    y: [0, -40, 0],
-                }}
-                transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 4 }}
-            />
+            <main style={{ background: "#030303", color: "#fff", fontFamily: "var(--font-montserrat), sans-serif" }}>
 
-            <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-20 flex flex-col gap-24">
-
-                {/* ── 1. HERO ── */}
-                <section className="max-w-4xl">
-                    <motion.div
-                        initial={{ opacity: 0, y: 28, filter: "blur(12px)" }}
-                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                        className="flex flex-col gap-6"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-[1px] bg-slate-500" />
-                            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-slate-400">
-                                Profils
-                            </span>
-                        </div>
-                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.1] uppercase">
-                            Les profils que nous mettons à votre disposition
+                {/* ── HERO ─────────────────────────────────── */}
+                <section style={{
+                    padding: "180px 24px 100px",
+                    textAlign: "center",
+                    position: "relative",
+                    overflow: "hidden",
+                }}>
+                    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+                        <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "70vw", height: "70vw", background: "radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 65%)", borderRadius: "50%", filter: "blur(80px)" }}></div>
+                    </div>
+                    <div style={{ maxWidth: 900, margin: "0 auto", position: "relative", zIndex: 1 }}>
+                        <p className="fade-up" style={{ color: "#d4af37", fontSize: 11, fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 24 }}>— Nos Services —</p>
+                        <h1 className="fade-up" style={{ fontSize: "clamp(3rem, 8vw, 6.5rem)", fontWeight: 900, lineHeight: 0.92, letterSpacing: "-0.03em", textTransform: "uppercase", margin: "0 0 32px" }}>
+                            Les profils<br />
+                            <span style={{ color: "#d4af37" }}>experts</span>
                         </h1>
-                        <p className="text-slate-400 text-lg md:text-xl leading-relaxed font-bold mt-4">
-                            Nous mettons en place pour vous les profils adaptés à chaque besoin, sur tous les métiers réalisables en ligne :
+                        <p className="fade-up" style={{ fontSize: "clamp(1rem, 1.8vw, 1.2rem)", color: "rgba(255,255,255,0.45)", fontWeight: 300, lineHeight: 1.8, maxWidth: 560, margin: "0 auto" }}>
+                            Nous mettons en place pour vous les profils adaptés à chaque besoin, sur tous les métiers réalisables en ligne.
                         </p>
-                    </motion.div>
-                </section>
-
-                {/* ── 2. PROFILES GRID ── */}
-                <section className="flex flex-col gap-12 border-t border-white/5 pt-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        {profiles.map((profile, i) => {
-                            const Icon = profile.icon;
-                            if (profile.image) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className={`closer-card-wrapper${i === 8 ? " lg:col-start-2" : ""}`}
-                                    >
-                                        <motion.div
-                                            custom={i}
-                                            variants={fadeUp}
-                                            initial="hidden"
-                                            whileInView="show"
-                                            viewport={{ once: true, margin: "-40px" }}
-                                            className="group flex flex-col rounded-[1.25rem] bg-[#0d0d14] overflow-hidden transition-all duration-500 h-60 sm:h-72 relative"
-                                        >
-                                            <div className="relative flex-1 w-full overflow-hidden">
-                                                <Image
-                                                    src={profile.image}
-                                                    alt={profile.title}
-                                                    fill
-                                                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
-                                                    className="object-cover opacity-100 group-hover:scale-110 transition-all duration-700"
-                                                    style={{ objectPosition: profile.objectPosition ?? "center center" }}
-                                                />
-                                                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0d0d14] to-transparent z-10" />
-                                                <div className="absolute inset-0 bg-[#0d0d14]/80 backdrop-blur-md z-20 flex items-center justify-center p-6 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                                    <p className="text-white text-sm leading-relaxed translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                                        {profile.description}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="px-3 py-4 flex items-center justify-center text-center relative z-30 bg-[#0d0d14] h-[72px] shrink-0">
-                                                <h4 className="text-white font-bold text-base md:text-lg">{profile.title}</h4>
-                                            </div>
-                                        </motion.div>
-                                    </div>
-                                );
-                            }
-                            return (
-                                <motion.div
-                                    key={i}
-                                    custom={i}
-                                    variants={fadeUp}
-                                    initial="hidden"
-                                    whileInView="show"
-                                    viewport={{ once: true, margin: "-40px" }}
-                                    className={`group glass-panel flex flex-col gap-4 p-6 sm:p-8 rounded-2xl hover:bg-slate-400/10 transition-all duration-300 ${i === 8 ? "lg:col-start-2" : ""}`}
-                                >
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-11 h-11 rounded-full bg-slate-100/10 border border-slate-100/20 flex items-center justify-center shrink-0 group-hover:bg-slate-100/20 group-hover:scale-110 group-hover:border-slate-100/40 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-                                            <Icon className="w-5 h-5 text-slate-100 drop-shadow-md" strokeWidth={1.5} />
-                                        </div>
-                                    </div>
-                                    <h3 className="text-slate-100 font-bold text-lg leading-tight mt-1">{profile.title}</h3>
-                                    <p className="text-slate-300/70 text-sm leading-relaxed">
-                                        {profile.description}
-                                    </p>
-                                </motion.div>
-                            );
-                        })}
                     </div>
-
-                    {/* ── 3. Contact section── */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
-                        className="glass-panel p-8 md:p-10 rounded-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8"
-                    >
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-500/3 blur-[80px] rounded-full pointer-events-none" />
-                        <p className="text-slate-300 leading-relaxed text-lg relative z-10 max-w-3xl">
-                            Et si vos besoins sont spécifiques, nous pouvons constituer une équipe entièrement personnalisée, adaptée à votre activité. Nous disposons d&apos;un répertoire complet de profils capables de couvrir tout ce qui peut se faire en ligne.
-                        </p>
-                        <Link
-                            href="/contact"
-                            className="relative z-10 shrink-0 inline-flex items-center gap-3 bg-white text-black font-semibold rounded-full px-8 py-4 hover:bg-slate-100 transition-colors duration-200"
-                        >
-                            Nous contacter
-                            <ArrowRight className="w-5 h-5" />
-                        </Link>
-                    </motion.div>
-                </section>
-                <section className="flex flex-col gap-16 md:gap-24 text-center max-w-[95vw] mx-auto w-full pt-6">
-                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-[#F8FAFC] to-[#94A3B8] leading-[1.2] py-2">
-                        COMMENT ÇA FONCTIONNE ?
-                    </h1>
-
-                    <div className="relative flex flex-col lg:flex-row justify-between gap-8 lg:gap-4 mt-4">
-                        {/* Connecting line for Desktop */}
-                        <div className="hidden lg:block absolute top-[44px] left-[5%] right-[5%] h-[2px] bg-slate-800 border-t border-dashed border-slate-700">
-                            <motion.div
-                                className="absolute inset-y-0 left-0 bg-linear-to-r from-transparent via-slate-300 to-transparent w-1/3 shadow-[0_0_15px_rgba(226,232,240,0.5)]"
-                                animate={{ x: ["-100%", "300%"] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                            />
-                        </div>
-
-                        {/* Connecting dashed line for Mobile */}
-                        <div className="lg:hidden absolute top-[5%] bottom-[5%] left-[39px] w-[2px] bg-slate-800 border-l border-dashed border-slate-700">
-                            <motion.div
-                                className="absolute inset-x-0 top-0 bg-linear-to-b from-transparent via-slate-300 to-transparent h-1/3 shadow-[0_0_15px_rgba(226,232,240,0.5)]"
-                                animate={{ y: ["-100%", "300%"] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                            />
-                        </div>
-
-                        {processSteps.map((step, i) => {
-                            const Icon = step.icon;
-                            return (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true, margin: "-40px" }}
-                                    transition={{ duration: 0.6, delay: i * 0.15 }}
-                                    className="relative flex flex-row lg:flex-col items-start lg:items-center gap-6 lg:gap-8 flex-1 group z-10"
-                                >
-                                    {/* Number / Icon Bubble */}
-                                    <div className="relative w-20 h-20 shrink-0 lg:mx-auto rounded-full bg-[#0d0d14] border-2 border-slate-300/30 shadow-[0_0_15px_rgba(226,232,240,0.08)] flex flex-col items-center justify-center group-hover:border-slate-200/50 group-hover:shadow-[0_0_30px_rgba(226,232,240,0.25)] transition-all duration-500">
-                                        <div className="absolute inset-0 rounded-full bg-slate-300/5 group-hover:bg-slate-300/15 transition-colors duration-500" />
-                                        <span className="text-xs font-bold text-slate-400 group-hover:text-slate-200 transition-colors mb-0.5">0{i + 1}</span>
-                                        <Icon className="w-6 h-6 text-slate-300 group-hover:text-slate-100 group-hover:drop-shadow-[0_0_8px_rgba(226,232,240,0.6)] transition-all duration-300" />
-                                    </div>
-
-                                    {/* Content Card */}
-                                    <div className="flex-1 glass-panel p-4 sm:p-6 lg:p-7 rounded-2xl transition-all duration-300 flex flex-col gap-3 text-left lg:text-center w-full">
-                                        <h3 className="text-xl font-bold text-slate-100 tracking-tight">{step.title}</h3>
-                                        <p className="text-sm md:text-base text-slate-400/90 leading-relaxed">
-                                            {step.description}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.8 }}
-                        className="flex justify-center"
-                    >
-                        <Link
-                            href="/contact"
-                            className="inline-flex items-center gap-3 bg-white text-black font-semibold rounded-full px-10 py-5 hover:bg-slate-100 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-                        >
-                            Nous contacter
-                            <ArrowRight className="w-5 h-5" />
-                        </Link>
-                    </motion.div>
                 </section>
 
-                {/* ── 4. POURQUOI EXTERNALISER ? ── */}
-                <section className="flex flex-col border-t border-white/5 pt-16 items-center">
-                    <motion.div
-                        initial="hidden"
-                        whileInView="show"
-                        viewport={{ once: true, margin: "-60px" }}
-                        className="group glass-panel relative p-8 md:p-12 lg:p-16 rounded-[2.5rem] transition-all duration-500 flex flex-col gap-10 w-full max-w-5xl overflow-hidden"
-                    >
-                        {/* Glow effect */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-500/5 blur-[80px] rounded-full pointer-events-none transition-all duration-500 group-hover:bg-slate-500/10" />
-
-                        <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-b from-slate-100 to-slate-400 tracking-tight text-center relative z-10">
-                            Pourquoi choisir ScalSet ?
-                        </h3>
-
-                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 lg:gap-x-12 lg:gap-y-8 mt-4 relative z-10">
-                            {whys.map((item, ii) => (
-                                <li key={ii} className="flex items-start gap-4 text-slate-200 md:text-lg font-medium leading-relaxed">
-                                    <div className="mt-1 bg-slate-100/10 border border-slate-100/20 p-2 rounded-full shrink-0 shadow-[0_0_10px_rgba(255,255,255,0.05)]">
-                                        <CheckCircle2 className="w-5 h-5 text-slate-100 drop-shadow-md" strokeWidth={2.5} />
-                                    </div>
-                                    <span className="font-medium pt-0.5">{item}</span>
-                                </li>
+                {/* ── PROFILES GRID ─────────────────────────────────── */}
+                <section style={{ padding: "80px 24px 120px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
+                            {profiles.map((p, i) => (
+                                <div key={i} className="profile-card fade-up" style={{ transitionDelay: `${(i % 4) * 0.08}s` }}>
+                                    <span style={{ display: "block", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.25em", color: "#d4af37", textTransform: "uppercase", marginBottom: 16 }}>
+                                        0{i + 1}
+                                    </span>
+                                    <h3 style={{ fontSize: "1.3rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 12 }}>{p.name}</h3>
+                                    <p style={{ color: "rgba(255,255,255,0.42)", lineHeight: 1.7, fontSize: "0.92rem", margin: 0 }}>{p.desc}</p>
+                                </div>
                             ))}
-                        </ul>
-
-                        <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.97 }}
-                            className="mt-4 flex justify-center relative z-10"
-                        >
-                            <Link
-                                href="/contact"
-                                className="inline-flex items-center gap-3 bg-white text-black font-semibold rounded-full px-10 py-5 hover:bg-slate-100 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-                            >
-                                Démarrer la collaboration
-                                <ArrowRight className="w-5 h-5" />
-                            </Link>
-                        </motion.div>
-                    </motion.div>
+                        </div>
+                    </div>
                 </section>
 
-            </div>
-        </main>
+                {/* ── HOW IT WORKS ─────────────────────────────────── */}
+                <section style={{ padding: "120px 24px", borderTop: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+                    <div style={{ maxWidth: 860, margin: "0 auto" }}>
+                        <div className="fade-up" style={{ textAlign: "center", marginBottom: 72 }}>
+                            <h2 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 900, letterSpacing: "-0.03em", textTransform: "uppercase", margin: "0 0 16px" }}>
+                                Comment ça <span style={{ color: "#d4af37" }}>fonctionne ?</span>
+                            </h2>
+                            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "1.05rem", lineHeight: 1.7 }}>
+                                Un processus simple, rapide et transparent.
+                            </p>
+                        </div>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                            {steps.map((step, i) => (
+                                <div key={i} className="step-card fade-up" style={{ transitionDelay: `${i * 0.1}s` }}>
+                                    <div style={{
+                                        width: 52, height: 52, borderRadius: "50%",
+                                        border: "2px solid rgba(212,175,55,0.3)",
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                        fontSize: "0.75rem", fontWeight: 900, color: "#d4af37", flexShrink: 0
+                                    }}>{step.n}</div>
+                                    <div>
+                                        <h3 style={{ fontSize: "1.1rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>{step.title}</h3>
+                                        <p style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.7, fontSize: "0.95rem", margin: 0 }}>{step.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* ── CTA ─────────────────────────────────── */}
+                <section style={{ padding: "120px 24px", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.05)", background: "radial-gradient(ellipse at 50% 100%, rgba(212,175,55,0.06) 0%, transparent 70%)" }}>
+                    <div className="fade-up" style={{ maxWidth: 640, margin: "0 auto" }}>
+                        <h2 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 900, letterSpacing: "-0.03em", textTransform: "uppercase", lineHeight: 1, margin: "0 0 24px" }}>
+                            Prêt à constituer<br />votre équipe ?
+                        </h2>
+                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "1.1rem", lineHeight: 1.7, marginBottom: 48 }}>
+                            Une solution sur mesure, déployée rapidement.
+                        </p>
+                        <Link href="/contact" style={{
+                            display: "inline-block", padding: "18px 48px",
+                            borderRadius: 9999, background: "#d4af37",
+                            color: "#000", fontWeight: 800, fontSize: "0.8rem",
+                            letterSpacing: "0.2em", textTransform: "uppercase", textDecoration: "none",
+                        }}>
+                            Nous contacter
+                        </Link>
+                    </div>
+                </section>
+
+            </main>
+        </>
     );
 }
